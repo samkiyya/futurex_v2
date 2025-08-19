@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:futurex_app/forum/models/comment.dart';
 import 'package:futurex_app/forum/provider/comment_provider.dart';
 import 'package:futurex_app/forum/provider/postCommnetProvider.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

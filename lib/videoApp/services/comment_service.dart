@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:futurex_app/constants/networks.dart';
 import 'package:http/http.dart' as http;
 import 'package:futurex_app/videoApp/models/comment_model.dart';
 import 'package:futurex_app/videoApp/models/replay_model.dart';
 
 class CommentService {
-  static const String _baseUrl = "https://usersservice.futurexapp.net";
+  static final String _baseUrl = Networks().coursePath;
 
   Future<List<Comment>> fetchCommentsByNotificationId(
     int notificationId,

@@ -43,6 +43,7 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
         ...?actions,
       ],
       backgroundColor: Colors.transparent,
+      iconTheme: const IconThemeData(color: Colors.white),
       elevation: 0,
       flexibleSpace: Container(
         decoration: BoxDecoration(
@@ -56,6 +57,7 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
+      centerTitle: true,
     );
   }
 

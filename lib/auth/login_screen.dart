@@ -4,6 +4,7 @@ import 'package:futurex_app/constants/styles.dart';
 import 'package:futurex_app/commonScreens/device_info.dart';
 
 import 'package:futurex_app/videoApp/screens/offline_screens/offline_course_screen.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:futurex_app/videoApp/provider/login_provider.dart';
@@ -18,6 +19,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool _obscurePassword = true;
   late final TextEditingController _phoneController;
   late final TextEditingController _passwordController;
   String _deviceName = '';
@@ -147,6 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final loginProvider = Provider.of<LoginProvider>(context, listen: false);
 
     return Scaffold(
+      appBar: GradientAppBar(title: "Login"),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -159,32 +162,59 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Stack(
             children: [
               SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildHeader(),
-                    const SizedBox(height: 32),
-                    _buildTextField(
-                      controller: _phoneController,
-                      label: 'Phone',
-                      icon: Icons.phone,
-                      keyboardType: TextInputType.phone,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 16,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Card(
+                      elevation: 4,
+                      shadowColor: Colors.black12,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 24,
+                          horizontal: 20,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildHeader(),
+                            const SizedBox(height: 28),
+                            _buildTextField(
+                              controller: _phoneController,
+                              label: 'Phone',
+                              icon: Icons.phone,
+                              keyboardType: TextInputType.phone,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
+                              controller: _passwordController,
+                              label: 'Password',
+                              icon: Icons.lock,
+                              isPassword: true,
+                            ),
+                            const SizedBox(height: 24),
+                            _buildLoginButton(loginProvider),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.center,
+                              child: _buildSignUpLink(),
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.center,
+                              child: _buildContactInfo(),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      icon: Icons.lock,
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 32),
-                    _buildLoginButton(loginProvider),
-                    const SizedBox(height: 16),
-                    _buildSignUpLink(),
-                    const SizedBox(height: 16),
-                    _buildContactInfo(),
-                  ],
+                  ),
                 ),
               ),
               if (_isLoading) _buildLoadingOverlay(),
@@ -235,73 +265,104 @@ class _LoginScreenState extends State<LoginScreen> {
     bool isPassword = false,
     TextInputType keyboardType = TextInputType.text,
   }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      keyboardType: keyboardType,
-      enabled: !_isLoading,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.grey),
-        prefixIcon: Icon(icon, color: Colors.blueAccent),
-        filled: true,
-        fillColor: Colors.grey[100],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+    return SizedBox(
+      height: 52,
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword ? _obscurePassword : false,
+        keyboardType: keyboardType,
+        enabled: !_isLoading,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.grey),
+          prefixIcon: Icon(icon, color: Colors.blueAccent),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                )
+              : null,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: 12,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildLoginButton(LoginProvider loginProvider) {
-    return ElevatedButton(
-      onPressed: _isLoading ? null : () => _handleLogin(loginProvider),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 8,
-        shadowColor: Colors.blueAccent.withOpacity(0.5),
-        animationDuration: const Duration(milliseconds: 200),
-        splashFactory: InkRipple.splashFactory,
-      ),
-      child: _isLoading
-          ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.login, size: 20),
-                const SizedBox(width: 8),
-                ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    colors: [Colors.white, Colors.cyanAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ).createShader(bounds),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : () => _handleLogin(loginProvider),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blueAccent,
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 6,
+          shadowColor: Colors.blueAccent.withOpacity(0.4),
+          animationDuration: const Duration(milliseconds: 200),
+          splashFactory: InkRipple.splashFactory,
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Icon(Icons.login, size: 20),
+                  const SizedBox(width: 8),
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Colors.white, Colors.cyanAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(bounds),
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 

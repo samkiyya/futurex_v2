@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:futurex_app/videoApp/provider/blog_provider.dart';
 import 'package:futurex_app/videoApp/provider/like_provider.dart';
 import 'package:futurex_app/videoApp/screens/Blog/blog_detail_screen.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:futurex_app/constants/networks.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:developer' as developer; // For logging
 
@@ -49,10 +51,7 @@ class _BlogGridScreenNotificationState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Notifications"), // Localized title
-        centerTitle: true,
-      ),
+      appBar: GradientAppBar(title: "Notifications"),
       backgroundColor: Colors.white,
       body: Consumer2<BlogProvider, LikeProvider>(
         builder: (context, blogProvider, likeProvider, child) {
@@ -229,7 +228,9 @@ class _BlogGridScreenNotificationState
       );
     }
 
-    final fullUrl = "https://usersservice.futurexapp.net/$mediaUrl";
+    final fullUrl = mediaUrl.startsWith('https://')
+        ? mediaUrl
+        : "${Networks().coursePath}/$mediaUrl";
 
     if (_isVideo(mediaUrl)) {
       return _buildVideoWithPlayIcon(fullUrl, blogId);
@@ -239,26 +240,32 @@ class _BlogGridScreenNotificationState
           topLeft: Radius.circular(16.0),
           topRight: Radius.circular(16.0),
         ),
-        child: Image.network(
-          fullUrl,
-          height: 100,
-          width: double.infinity,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return const Center(child: CircularProgressIndicator());
-          },
-          errorBuilder: (context, error, stackTrace) {
-            developer.log('Image load error for $fullUrl: $error');
-            return Container(
-              height: 100,
-              color: Colors.grey[200],
-              child: const Center(
-                child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
-              ),
-            );
-          },
-        ),
+        child: fullUrl.isNotEmpty
+            ? Image.network(
+                fullUrl,
+                height: 100,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(child: CircularProgressIndicator());
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  developer.log('Image load error for $fullUrl: $error');
+                  return Container(
+                    height: 100,
+                    color: Colors.grey[200],
+                    child: const Center(
+                      child: Icon(
+                        Icons.broken_image,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  );
+                },
+              )
+            : null,
       );
     }
   }

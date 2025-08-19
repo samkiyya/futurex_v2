@@ -6,7 +6,7 @@ import 'package:futurex_app/videoApp/models/course_model.dart';
 import 'package:futurex_app/videoApp/provider/home_course_provider.dart';
 import 'package:futurex_app/videoApp/screens/offline_screens/offline_section_screen.dart';
 import 'package:futurex_app/videoApp/screens/online_screens/online_course_screen.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';

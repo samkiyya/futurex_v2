@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:futurex_app/videoApp/provider/login_provider.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:provider/provider.dart';
 import 'package:futurex_app/forum/provider/testimonial_provider.dart';

@@ -7,7 +7,7 @@ import 'package:futurex_app/videoApp/provider/home_course_provider.dart';
 import 'package:futurex_app/videoApp/provider/online_course_provide.dart';
 import 'package:futurex_app/videoApp/screens/offline_screens/offline_course_screen.dart';
 import 'package:futurex_app/videoApp/screens/online_screens/online_section_screen.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/drawer.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:futurex_app/widgets/responsive_image_with_text_widget.dart';

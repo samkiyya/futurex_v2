@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:futurex_app/constants/networks.dart';
 import 'package:futurex_app/videoApp/provider/blog_comment_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:futurex_app/videoApp/models/blog_model.dart';
@@ -33,7 +34,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
   }
 
   void _initializeVideoPlayer() {
-    final videoUrl = "https://usersservice.futurexapp.net/${widget.blog.media}";
+    final videoUrl = "${Networks().coursePath}/${widget.blog.media}";
     _videoPlayerController = VideoPlayerController.network(videoUrl)
       ..initialize()
           .then((_) {
@@ -127,7 +128,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                               )
                             : const Center(child: CircularProgressIndicator())
                       : Image.network(
-                          "https://usersservice.futurexapp.net/${widget.blog.media}",
+                          "${Networks().coursePath}/${widget.blog.media}",
                           fit: BoxFit.cover,
                         ),
                 ],

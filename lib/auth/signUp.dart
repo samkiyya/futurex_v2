@@ -5,8 +5,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:futurex_app/commonScreens/device_info.dart';
 import 'package:futurex_app/constants/networks.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
+import 'package:futurex_app/auth/login_screen.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
-import 'package:futurex_app/widgets/regsitrationSteps_widgets.dart';
+import 'package:futurex_app/widgets/regsitration_steps_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,6 +18,8 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  bool _obscurePassword = true; // Add this state variable
+  bool _obscureConfirmPassword = true; // Add for confirm password
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   final DeviceInfoService _deviceInfoService = DeviceInfoService();
@@ -218,27 +222,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: const Text(
-          'Sign Up',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        backgroundColor: Colors.blueAccent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.cyan],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
+      appBar: GradientAppBar(title: "Sign Up"),
       body: Stack(
         children: [
           Container(
@@ -246,174 +230,192 @@ class _SignUpScreenState extends State<SignUpScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.blueAccent.withOpacity(0.1), Colors.white],
+                colors: [Colors.blueAccent.withOpacity(0.2), Colors.white],
               ),
             ),
             child: SafeArea(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: constraints.maxWidth * 0.05,
-                      vertical: 24,
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Create Your Account',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blueAccent,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Fill in the details below to get started.',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 24),
-                          _buildTextField('first_name', 'First Name'),
-                          _buildTextField('last_name', 'Last Name'),
-                          _buildTextField(
-                            'phone',
-                            'Phone Number',
-                            isPhone: true,
-                          ),
-                          _buildTextField(
-                            'password',
-                            'Password',
-                            isPassword: true,
-                          ),
-                          _buildTextField(
-                            'confirm_password',
-                            'Confirm Password',
-                            isPassword: true,
-                          ),
-                          _buildTextField('school', 'School'),
-                          _buildDropdown(
-                            label: 'Stream',
-                            value: _selectedCategory,
-                            items: _categories,
-                            onChanged: (value) =>
-                                setState(() => _selectedCategory = value),
-                            validator: (value) =>
-                                value == null ? 'Please select a stream' : null,
-                          ),
-                          _buildDropdown(
-                            label: 'Region',
-                            value: _selectedRegion,
-                            items: _regions,
-                            onChanged: (value) =>
-                                setState(() => _selectedRegion = value),
-                            validator: (value) =>
-                                value == null ? 'Please select a region' : null,
-                          ),
-                          _buildGenderSelector(),
-                          _buildDropdown(
-                            label: 'Grade',
-                            value: _selectedGrade,
-                            items: _grades,
-                            onChanged: (value) =>
-                                setState(() => _selectedGrade = value),
-                            validator: (value) =>
-                                value == null ? 'Please select a grade' : null,
-                          ),
-                          const SizedBox(height: 16),
-
-                          const SizedBox(height: 32),
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _registerUser,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                  horizontal: 32,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 16,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Card(
+                      elevation: 4,
+                      shadowColor: Colors.black12,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 24,
+                          horizontal: 20,
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Create Your Account',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueAccent,
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 8,
-                                shadowColor: Colors.blueAccent.withOpacity(0.5),
                               ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 3,
-                                      ),
-                                    )
-                                  : Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.person_add, size: 20),
-                                        const SizedBox(width: 8),
-                                        ShaderMask(
-                                          shaderCallback: (bounds) =>
-                                              const LinearGradient(
-                                                colors: [
-                                                  Colors.white,
-                                                  Colors.cyanAccent,
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ).createShader(bounds),
-                                          child: const Text(
-                                            'Register',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Fill in the details below to get started.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildTextField('first_name', 'First Name'),
+                              _buildTextField('last_name', 'Last Name'),
+                              _buildTextField(
+                                'phone',
+                                'Phone Number',
+                                isPhone: true,
+                              ),
+                              _buildTextField(
+                                'password',
+                                'Password',
+                                isPassword: true,
+                              ),
+                              _buildTextField(
+                                'confirm_password',
+                                'Confirm Password',
+                                isPassword: true,
+                              ),
+                              _buildTextField('school', 'School'),
+                              _buildDropdown(
+                                label: 'Stream',
+                                value: _selectedCategory,
+                                items: _categories,
+                                onChanged: (value) =>
+                                    setState(() => _selectedCategory = value),
+                                validator: (value) => value == null
+                                    ? 'Please select a stream'
+                                    : null,
+                              ),
+                              _buildDropdown(
+                                label: 'Region',
+                                value: _selectedRegion,
+                                items: _regions,
+                                onChanged: (value) =>
+                                    setState(() => _selectedRegion = value),
+                                validator: (value) => value == null
+                                    ? 'Please select a region'
+                                    : null,
+                              ),
+                              _buildGenderSelector(),
+                              _buildDropdown(
+                                label: 'Grade',
+                                value: _selectedGrade,
+                                items: _grades,
+                                onChanged: (value) =>
+                                    setState(() => _selectedGrade = value),
+                                validator: (value) => value == null
+                                    ? 'Please select a grade'
+                                    : null,
+                              ),
+                              const SizedBox(height: 16),
+
+                              const SizedBox(height: 32),
+                              // Full-width register button
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _registerUser,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 8,
+                                    shadowColor: Colors.blueAccent.withOpacity(
+                                      0.5,
+                                    ),
+                                    minimumSize: const Size.fromHeight(48),
+                                  ),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 3,
                                           ),
-                                        ),
-                                        Row(
+                                        )
+                                      : Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
-                                          children: [
-                                            const Text(
-                                              'Already have an account? ',
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: const [
+                                            Icon(Icons.person_add, size: 20),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              'Register',
                                               style: TextStyle(
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                // Navigate to login screen
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  '/login',
-                                                );
-                                              },
-                                              child: const Text(
-                                                'Login here',
-                                                style: TextStyle(
-                                                  color: Colors.blueAccent,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ],
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              // Login prompt moved outside the button to match the screenshot
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    'Already have an account? ',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  GestureDetector(
+                                    onTap: _isLoading
+                                        ? null
+                                        : () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const LoginScreen(),
+                                            ),
+                                          ),
+                                    child: const Text(
+                                      'Login here',
+                                      style: TextStyle(
+                                        color: Colors.blueAccent,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ), // Column
+                        ), // Form
+                      ), // Padding
+                    ), // Card
+                  ), // ConstrainedBox
+                ), // Center
+              ), // SingleChildScrollView
+            ), // SafeArea
+          ), // Container
+
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),
@@ -469,20 +471,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
-                    _controllers[key]!.text.isNotEmpty
-                        ? Icons.visibility
-                        : Icons.visibility_off,
+                    (key == 'password'
+                            ? _obscurePassword
+                            : _obscureConfirmPassword)
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: Colors.grey,
                   ),
                   onPressed: () {
                     setState(() {
-                      // Toggle password visibility (implement if needed)
+                      if (key == 'password') {
+                        _obscurePassword = !_obscurePassword;
+                      } else if (key == 'confirm_password') {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      }
                     });
                   },
                 )
               : null,
         ),
-        obscureText: isPassword,
+        obscureText: isPassword
+            ? (key == 'password' ? _obscurePassword : _obscureConfirmPassword)
+            : false,
         keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -592,35 +602,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: RadioListTile<String>(
-                  title: const Text('Male'),
-                  value: 'Male',
-                  groupValue: _selectedGender,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => setState(() => _selectedGender = value),
-                  activeColor: Colors.blueAccent,
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              Expanded(
-                child: RadioListTile<String>(
-                  title: const Text('Female'),
-                  value: 'Female',
-                  groupValue: _selectedGender,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => setState(() => _selectedGender = value),
-                  activeColor: Colors.blueAccent,
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ],
+          Center(
+            child: ToggleButtons(
+              isSelected: [
+                _selectedGender == 'Male',
+                _selectedGender == 'Female',
+              ],
+              onPressed: _isLoading
+                  ? null
+                  : (index) => setState(() {
+                      _selectedGender = index == 0 ? 'Male' : 'Female';
+                    }),
+              borderRadius: BorderRadius.circular(12),
+              selectedColor: Colors.white,
+              fillColor: Colors.blueAccent,
+              color: Colors.black87,
+              constraints: const BoxConstraints(minWidth: 120, minHeight: 44),
+              children: const [
+                Text('Male', style: TextStyle(fontSize: 16)),
+                Text('Female', style: TextStyle(fontSize: 16)),
+              ],
+            ),
           ),
         ],
       ),

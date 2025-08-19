@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:futurex_app/game/screens/selectGradeScreen.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:futurex_app/widgets/drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';

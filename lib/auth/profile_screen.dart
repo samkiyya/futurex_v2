@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:futurex_app/forum/screens/discussion_group_screen.dart';
 import 'package:futurex_app/forum/screens/testimonials_screen.dart';
 import 'package:futurex_app/videoApp/provider/themProvider.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -213,13 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Profile"),
-        centerTitle: true,
-        backgroundColor: isDarkMode ? Colors.blue[900] : Colors.blue[900],
-        foregroundColor: isDarkMode ? Colors.white : null,
-        actions: const [Icon(Icons.notifications)],
-      ),
+      appBar: GradientAppBar(title: "Profile"),
       drawer: const MyDrawer(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

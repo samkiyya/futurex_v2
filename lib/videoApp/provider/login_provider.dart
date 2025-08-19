@@ -21,12 +21,8 @@ class LoginProvider extends ChangeNotifier {
 
     try {
       Response response = await dio.post(
-        Networks().userAPI + '/auth/login',
-        data: {
-          "phone": phone,
-          "password": password,
-          "device": device, // <-- Device is commented out, as per backend logic
-        },
+        '${Networks().userAPI}/auth/login',
+        data: {"phone": phone, "password": password, "device": device},
         options: Options(headers: {"Content-Type": "application/json"}),
       );
 

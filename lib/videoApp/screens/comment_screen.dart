@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:futurex_app/videoApp/provider/comment_provider.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/comment_widgets/comment_header.dart';
 import 'package:futurex_app/widgets/comment_widgets/comment_input.dart';
 import 'package:futurex_app/widgets/comment_widgets/comment_list.dart';

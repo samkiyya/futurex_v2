@@ -8,7 +8,7 @@ import 'package:futurex_app/videoApp/models/course_model.dart';
 import 'package:futurex_app/videoApp/provider/home_course_provider.dart';
 import 'package:futurex_app/videoApp/screens/Blog/notfi_blog_screen.dart';
 import 'package:futurex_app/videoApp/screens/slider.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:futurex_app/widgets/drawer.dart';
 import 'package:futurex_app/widgets/home_screen_widgets/banner_widget.dart';

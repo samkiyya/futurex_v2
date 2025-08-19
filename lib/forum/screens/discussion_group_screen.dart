@@ -3,7 +3,7 @@ import 'package:futurex_app/forum/models/post.dart';
 import 'package:futurex_app/forum/provider/post_provider.dart';
 import 'package:futurex_app/forum/screens/create_forum.dart';
 import 'package:futurex_app/forum/screens/post_detail_screen.dart';
-import 'package:futurex_app/widgets/appBar.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

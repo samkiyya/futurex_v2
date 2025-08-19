@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationScreen extends StatelessWidget {
+  const NotificationScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<String>>(
@@ -10,19 +13,19 @@ class NotificationScreen extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           List<String> notifications = snapshot.data ?? [];
           return Scaffold(
-            appBar: AppBar(
-              title: Text('ማሳወቂያዎች'),
-            ),
+            appBar: AppBar(title: Text('ማሳወቂያዎች')),
             body: ListView.builder(
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 String notification = notifications[index];
 
                 List<String> parts = notification.split(':');
-                String title =
-                    parts.length > 0 ? parts[0].trim() : "Default Title";
-                String message =
-                    parts.length > 1 ? parts[1].trim() : "Default Message";
+                String title = parts.length > 0
+                    ? parts[0].trim()
+                    : "Default Title";
+                String message = parts.length > 1
+                    ? parts[1].trim()
+                    : "Default Message";
 
                 return Card(
                   elevation: 3.0,
@@ -41,10 +44,7 @@ class NotificationScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 8.0),
-                        Text(
-                          message,
-                          style: TextStyle(fontSize: 16.0),
-                        ),
+                        Text(message, style: TextStyle(fontSize: 16.0)),
                       ],
                     ),
                     contentPadding: EdgeInsets.all(16.0),
@@ -55,12 +55,8 @@ class NotificationScreen extends StatelessWidget {
           );
         } else {
           return Scaffold(
-            appBar: AppBar(
-              title: Text('Notifications'),
-            ),
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            appBar: GradientAppBar(title: "Notifications"),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
       },

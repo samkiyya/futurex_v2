@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:futurex_app/constants/networks.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:futurex_app/videoApp/models/like_model.dart';
 
 class LikeService {
-  static const String _baseUrl = "https://usersservice.futurexapp.net";
+  static final String _baseUrl = Networks().coursePath;
 
   // Fetch all likes for the current user
   Future<Map<int, bool>> fetchLikesForUser() async {
