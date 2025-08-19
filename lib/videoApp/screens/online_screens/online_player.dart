@@ -138,10 +138,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
       appBar: _isFullscreen
           ? null
           : AppBar(
-              title: Text(
-                widget.title ?? 'Default Title', // Handle null
-                style: TextStyle(color: Colors.white),
-              ),
+              title: Text(widget.title, style: TextStyle(color: Colors.white)),
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
             ),
@@ -218,7 +215,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Text(
-                  _overlayText ?? '', // Handle null
+                  _overlayText,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -243,9 +240,9 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                         ),
                       )
                     : Padding(
-                        padding: EdgeInsets.all(0.0),
+                        padding: const EdgeInsets.all(0.0),
                         child: Text(
-                          widget.title ?? 'Default Title', // Handle null
+                          widget.title,
                           style: TextStyle(
                             fontSize: 98,
                             fontWeight: FontWeight.w100,
@@ -264,10 +261,10 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                       if (videoUrl == null) return Text("");
                       final thumbnailUrl = _getVideoThumbnail(videoUrl);
                       LessonCheckerService.getLessonType(
-                        video['lesson_type'] ?? '',
-                        video['video_type'] ?? '',
-                        video['link'] ?? '',
-                        video['attachment_type'] ?? '', // Handle null
+                        video['lesson_type'] as String?,
+                        video['video_type'] as String?,
+                        video['link'] as String?,
+                        video['attachment_type'] as String?,
                       );
                       return GestureDetector(
                         onTap: () {
@@ -278,8 +275,10 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                               builder: (context) => OnlineVideoPlayerScreen(
                                 videoUrl: videoUrl,
                                 title:
-                                    video['lesson'] ??
-                                    'Untitled Lesson', // Handle null
+                                    (video['lesson'] ??
+                                            video['title'] ??
+                                            widget.title)
+                                        .toString(),
                                 lessons: widget.lessons,
                               ),
                             ),

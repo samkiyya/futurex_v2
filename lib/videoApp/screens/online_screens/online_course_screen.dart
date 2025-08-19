@@ -69,60 +69,7 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // Offline Courses Button
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          foregroundColor: _isOnlineActive
-                              ? Colors.grey
-                              : Colors.blue,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero,
-                          ),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isOnlineActive = false;
-                          });
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => OfflineCourseScreen(
-                                userId: widget.userId,
-                                isOnline: false,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.download_for_offline,
-                              color: _isOnlineActive
-                                  ? Colors.grey
-                                  : Colors.blue,
-                            ),
-                            const SizedBox(height: 4),
-                            const Text("Offline Courses"),
-                            const SizedBox(height: 4),
-                            Container(
-                              height: 2,
-                              width: double.infinity,
-                              color: _isOnlineActive
-                                  ? Colors.transparent
-                                  : Colors.blue,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Online Courses Button
+                  // Online Courses Button (moved to the left)
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -168,6 +115,59 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
                               color: _isOnlineActive
                                   ? Colors.blue
                                   : Colors.transparent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Offline Courses Button (moved to the right)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          foregroundColor: _isOnlineActive
+                              ? Colors.grey
+                              : Colors.blue,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isOnlineActive = false;
+                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OfflineCourseScreen(
+                                userId: widget.userId,
+                                isOnline: false,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.download_for_offline,
+                              color: _isOnlineActive
+                                  ? Colors.grey
+                                  : Colors.blue,
+                            ),
+                            const SizedBox(height: 4),
+                            const Text("Offline Courses"),
+                            const SizedBox(height: 4),
+                            Container(
+                              height: 2,
+                              width: double.infinity,
+                              color: _isOnlineActive
+                                  ? Colors.transparent
+                                  : Colors.blue,
                             ),
                           ],
                         ),
@@ -345,7 +345,7 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
         ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
           child: Image.network(
-            '${course.thumbnail}',
+            course.thumbnail,
             width: double.infinity,
             height: 180,
             fit: BoxFit.contain,
@@ -360,7 +360,7 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
             ),
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
-              return Container(
+              return SizedBox(
                 height: 180,
                 child: Center(
                   child: CircularProgressIndicator(

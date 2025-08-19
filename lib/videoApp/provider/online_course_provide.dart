@@ -27,7 +27,7 @@ class OnlineCourseProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _dio.get(Networks().courseAPI + '/courses');
+      final response = await _dio.get('${Networks().courseAPI}/courses');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -54,7 +54,7 @@ class OnlineCourseProvider with ChangeNotifier {
   void _categorizeCourses() {
     _newCourses = List.from(_courses)
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt))
-      ..take(5).toList();
+      ..take(10).toList();
 
     final gradeOrder = ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
     final gradeCourses = <String, List<Course>>{};

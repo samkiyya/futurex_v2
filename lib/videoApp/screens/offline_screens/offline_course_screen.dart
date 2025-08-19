@@ -60,11 +60,6 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
     });
   }
 
-  Future<String> _getGradeRange() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('gradeRange') ?? '9-12';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,50 +73,7 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Offline Courses Button
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        foregroundColor: _isOnlineActive
-                            ? Colors.grey
-                            : Colors.blue,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isOnlineActive = false;
-                        });
-                        _loadCourses();
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.download_for_offline,
-                            color: _isOnlineActive ? Colors.grey : Colors.blue,
-                          ),
-                          const SizedBox(height: 4),
-                          const Text("Offline Courses"),
-                          const SizedBox(height: 4),
-                          Container(
-                            height: 2,
-                            width: double.infinity,
-                            color: _isOnlineActive
-                                ? Colors.transparent
-                                : Colors.blue,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Online Courses Button
+                // Online Courses Button (moved to the left)
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -165,6 +117,49 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
                             color: _isOnlineActive
                                 ? Colors.blue
                                 : Colors.transparent,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Offline Courses Button (moved to the right)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: _isOnlineActive
+                            ? Colors.grey
+                            : Colors.blue,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isOnlineActive = false;
+                        });
+                        _loadCourses();
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.download_for_offline,
+                            color: _isOnlineActive ? Colors.grey : Colors.blue,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text("Offline Courses"),
+                          const SizedBox(height: 4),
+                          Container(
+                            height: 2,
+                            width: double.infinity,
+                            color: _isOnlineActive
+                                ? Colors.transparent
+                                : Colors.blue,
                           ),
                         ],
                       ),

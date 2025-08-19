@@ -4,7 +4,6 @@ import 'package:futurex_app/commonScreens/chat_bottom_sheet.dart';
 import 'package:futurex_app/videoApp/provider/offline_lesson_provide.dart';
 import 'package:futurex_app/videoApp/screens/google_form.dart';
 import 'package:futurex_app/videoApp/screens/offline_screens/lesson_screen_helper.dart';
-import 'package:futurex_app/videoApp/screens/offline_screens/pdf_reader_online.dart';
 import 'package:futurex_app/videoApp/screens/online_screens/onlinePdf_reader.dart';
 import 'package:futurex_app/videoApp/services/donwload_service.dart';
 import 'package:futurex_app/videoApp/services/lesson_checker_service.dart';
@@ -105,10 +104,10 @@ class _LessonScreenState extends State<LessonScreen>
         .where(
           (lesson) =>
               LessonCheckerService.getLessonType(
-                lesson['lesson_type']?.toString() ?? '',
-                lesson['video_type']?.toString() ?? '',
-                lesson['link']?.toString() ?? '',
-                lesson['attachment_type']?.toString() ?? '',
+                lesson['lesson_type'] as String?,
+                lesson['video_type'] as String?,
+                lesson['link'] as String?,
+                lesson['attachment_type'] as String?,
               ) ==
               'video',
         )
@@ -117,10 +116,10 @@ class _LessonScreenState extends State<LessonScreen>
         .where(
           (lesson) =>
               LessonCheckerService.getLessonType(
-                lesson['lesson_type']?.toString() ?? '',
-                lesson['video_type']?.toString() ?? '',
-                lesson['link']?.toString() ?? '',
-                lesson['attachment_type']?.toString() ?? '',
+                lesson['lesson_type'] as String?,
+                lesson['video_type'] as String?,
+                lesson['link'] as String?,
+                lesson['attachment_type'] as String?,
               ) ==
               'pdf',
         )
@@ -129,10 +128,10 @@ class _LessonScreenState extends State<LessonScreen>
         .where(
           (lesson) =>
               LessonCheckerService.getLessonType(
-                lesson['lesson_type']?.toString() ?? '',
-                lesson['video_type']?.toString() ?? '',
-                lesson['link']?.toString() ?? '',
-                lesson['attachment_type']?.toString() ?? '',
+                lesson['lesson_type'] as String?,
+                lesson['video_type'] as String?,
+                lesson['link'] as String?,
+                lesson['attachment_type'] as String?,
               ) ==
               'html',
         )
@@ -141,10 +140,10 @@ class _LessonScreenState extends State<LessonScreen>
         .where(
           (lesson) =>
               LessonCheckerService.getLessonType(
-                lesson['lesson_type']?.toString() ?? '',
-                lesson['video_type']?.toString() ?? '',
-                lesson['link']?.toString() ?? '',
-                lesson['attachment_type']?.toString() ?? '',
+                lesson['lesson_type'] as String?,
+                lesson['video_type'] as String?,
+                lesson['link'] as String?,
+                lesson['attachment_type'] as String?,
               ) ==
               'exam',
         )

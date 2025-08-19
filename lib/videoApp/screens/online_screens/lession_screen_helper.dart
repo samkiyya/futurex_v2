@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:futurex_app/videoApp/provider/themProvider.dart';
 import 'package:futurex_app/videoApp/screens/offline_screens/online_player.dart';
-import 'package:futurex_app/videoApp/screens/offline_screens/pdf_reader_online.dart';
 import 'package:futurex_app/videoApp/screens/online_screens/onlinePdf_reader.dart';
 import 'package:futurex_app/videoApp/services/lesson_checker_service.dart';
 import 'package:futurex_app/videoApp/services/lesson_service.dart';
 import 'package:futurex_app/videoApp/services/lesson_widgets.dart';
 import 'package:futurex_app/videoApp/webview/htmlViewer.dart';
-import 'package:futurex_app/videoApp/webview/webview.dart';
 import 'package:futurex_app/videoApp/screens/offline_screens/lessons_screen.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:provider/provider.dart';
@@ -97,7 +95,7 @@ class OnlineLessonController {
       lessonType,
       videoType,
       link,
-      attachmentType.toString(),
+      attachmentType,
     );
   }
 
