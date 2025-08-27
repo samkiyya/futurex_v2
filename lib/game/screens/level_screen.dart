@@ -17,14 +17,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserLevelScreen extends StatefulWidget {
   final String userId;
 
-  UserLevelScreen({required this.userId});
+  const UserLevelScreen({super.key, required this.userId});
 
   @override
-  _UserLevelScreenState createState() => _UserLevelScreenState();
+  State<UserLevelScreen> createState() => _UserLevelScreenState();
 }
 
 class _UserLevelScreenState extends State<UserLevelScreen> {
-  final network = new Networks();
+  final network = Networks();
   int totalScore = 0;
   String name = "";
   String phone = "";
@@ -47,7 +47,7 @@ class _UserLevelScreenState extends State<UserLevelScreen> {
   // get user total mark
   Future<void> fetchUserTotalMark(id) async {
     final response = await http.get(
-      Uri.parse(network.baseApiUrl + '/user-total-score/9072/'),
+      Uri.parse('${network.baseApiUrl}/user-total-score/9072/'),
     ); // Replace with your API URL
 
     if (response.statusCode == 200) {

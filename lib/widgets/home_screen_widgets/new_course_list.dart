@@ -37,15 +37,11 @@ class NewCourseList extends StatelessWidget {
               padding: EdgeInsets.all(8.0),
               child: Text(
                 "New Courses",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(
-              height: 330,
+              height: 260,
               width: double.infinity,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -63,7 +59,7 @@ class NewCourseList extends StatelessWidget {
 
   List<Course> _filterNewCoursesByGradeRange(String gradeRange) {
     final now = DateTime.now();
-    final ninetyDaysAgo = now.subtract(const Duration(days: 90));
+    final ninetyDaysAgo = now.subtract(const Duration(days: 150));
 
     return courses.where((course) {
       final categoryName = course.category?.catagory ?? '';

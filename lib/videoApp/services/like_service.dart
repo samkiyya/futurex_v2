@@ -9,7 +9,7 @@ class LikeService {
 
   // Fetch all likes for the current user
   Future<Map<int, bool>> fetchLikesForUser() async {
-    final uri = Uri.parse("$_baseUrl/api/notification-replay/like");
+    final uri = Uri.parse("$_baseUrl/api/notifications-interactions/like");
     final prefs = await SharedPreferences.getInstance();
     final userIdStr = prefs.getString('userId');
     final userId = userIdStr == null ? null : int.tryParse(userIdStr);
@@ -40,7 +40,7 @@ class LikeService {
   }
 
   Future<void> likeNotification(int notificationId) async {
-    final uri = Uri.parse("$_baseUrl/api/notification-replay/like");
+    final uri = Uri.parse("$_baseUrl/api/notifications-interactions/like");
     final prefs = await SharedPreferences.getInstance();
     final userIdStr = prefs.getString('userId');
     final userId = userIdStr == null ? null : int.tryParse(userIdStr);
@@ -66,14 +66,14 @@ class LikeService {
       print("Notification already liked.");
       return;
     }
-
-    if (response.statusCode != 200) {
+    // Treat any 2xx as success (201 Created is common)
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception("Failed to like the notification: ${response.body}");
     }
   }
 
   Future<void> unlikeNotification(int notificationId) async {
-    final uri = Uri.parse("$_baseUrl/api/notification-replay/like/");
+    final uri = Uri.parse("$_baseUrl/api/notifications-interactions/unlike");
     final prefs = await SharedPreferences.getInstance();
     final userIdStr = prefs.getString('userId');
     final userId = userIdStr == null ? null : int.tryParse(userIdStr);
@@ -88,14 +88,15 @@ class LikeService {
       userId: userId,
     );
 
-    final response = await http.delete(
+    final response = await http.post(
       uri,
       headers: {"Content-Type": "application/json"},
       body: json.encode(like.toJson()),
     );
 
-    if (response.statusCode != 200) {
-      throw Exception("Failed to unlike the notification");
+    // Treat 2xx (including 204 No Content) as success
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception("Failed to unlike the notification: ${response.body}");
     }
   }
 }

@@ -25,7 +25,7 @@ class SectionProvider with ChangeNotifier {
     bool hasConnection = await _hasConnection();
     _isLoading = true;
     _errorMessage = '';
-    final String apiUrl = Networks().sectionAPI + '/sections/course/$courseId/';
+    final String apiUrl = '${Networks().sectionAPI}/sections/course/$courseId/';
     if (hasConnection) {
       try {
         final response = await _dio.get(apiUrl);

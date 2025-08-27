@@ -1,12 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, non_constant_identifier_names, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:futurex_app/commonScreens/howtoStart.dart';
 import 'package:futurex_app/constants/constants.dart';
-import 'package:futurex_app/utils/prefs_utils.dart';
 import 'package:futurex_app/videoApp/models/course_model.dart';
 import 'package:futurex_app/videoApp/provider/home_course_provider.dart';
-import 'package:futurex_app/videoApp/screens/Blog/notfi_blog_screen.dart';
 import 'package:futurex_app/videoApp/screens/slider.dart';
 import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';

@@ -192,6 +192,7 @@ class _OnlineLessonState extends State<OnlineLesson>
     return AppBar(
       title: Text(widget.section, style: TextStyle(color: Colors.white)),
       backgroundColor: Colors.blueAccent,
+      foregroundColor: Colors.white,
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh),

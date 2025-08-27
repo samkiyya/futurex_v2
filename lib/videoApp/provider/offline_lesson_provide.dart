@@ -29,7 +29,7 @@ class OfflineLessonProvider extends ChangeNotifier {
 
         print("Fetching video lessons...");
         response = await dio.get(
-          Networks().lessonAPI + '/lessons/section/$sectionId',
+          '${Networks().lessonAPI}/lessons/section/$sectionId',
         );
 
         if (response.statusCode == 200) {

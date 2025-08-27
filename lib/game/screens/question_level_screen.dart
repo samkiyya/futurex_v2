@@ -22,7 +22,8 @@ class QuestionByLevelScreen extends StatefulWidget {
   final String grade;
   final String cid;
   final String subjectName;
-  QuestionByLevelScreen({
+  const QuestionByLevelScreen({
+    super.key,
     required this.subjectId,
     required this.level,
     required this.chapter,
@@ -115,7 +116,7 @@ class _QuestionByLevelScreenState extends State<QuestionByLevelScreen> {
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: Text(
-          'Grade ' + widget.grade + " ",
+          'Grade + ${widget.grade} ',
           style: TextStyle(color: Colors.white),
         ),
         actions: [
@@ -178,9 +179,10 @@ class _QuestionByLevelScreenState extends State<QuestionByLevelScreen> {
       ),
       bottomNavigationBar: BottomNav(
         onTabSelected: (index) {},
-        currentSelectedIndex: 3,
+        currentSelectedIndex: 2,
       ),
     );
   }
 }
+
 //  question body everything is here

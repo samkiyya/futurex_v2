@@ -171,12 +171,13 @@ class _CourseCardState extends State<CourseCard>
                 return Transform.scale(
                   scale: _scaleAnimation.value,
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                    width: 185,
+                    margin: const EdgeInsets.symmetric(vertical: 12.0),
+
                     child: Card(
                       elevation: 10.0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
                       shadowColor: Colors.blueAccent.withOpacity(0.4),
                       child: ClipRRect(
@@ -198,14 +199,14 @@ class _CourseCardState extends State<CourseCard>
                                 ),
                                 child: Image.network(
                                   widget.course.thumbnail,
-                                  height: 190,
+                                  height: 120,
                                   fit: BoxFit.contain,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
                                         if (loadingProgress == null)
                                           return child;
                                         return SizedBox(
-                                          height: 200,
+                                          height: 120,
                                           child: Center(
                                             child: CircularProgressIndicator(
                                               value:
@@ -224,7 +225,7 @@ class _CourseCardState extends State<CourseCard>
                                       },
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
-                                      height: 200,
+                                      height: 120,
                                       color: Colors.grey.shade300,
                                       child: const Icon(
                                         Icons.broken_image,

@@ -10,7 +10,7 @@ class GradeListScreen extends StatefulWidget {
   const GradeListScreen({super.key});
 
   @override
-  _GradeListScreenState createState() => _GradeListScreenState();
+  State<GradeListScreen> createState() => _GradeListScreenState();
 }
 
 class _GradeListScreenState extends State<GradeListScreen> {
@@ -118,7 +118,7 @@ class _GradeListScreenState extends State<GradeListScreen> {
       ),
       bottomNavigationBar: BottomNav(
         onTabSelected: (index) {},
-        currentSelectedIndex: 3,
+        currentSelectedIndex: 2,
       ),
     );
   }

@@ -34,7 +34,14 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
   }
 
   void _initializeVideoPlayer() {
-    final videoUrl = "${Networks().coursePath}/${widget.blog.media}";
+    final media = widget.blog.media ?? '';
+    final videoUrl = media.startsWith('http')
+        ? media
+        : (() {
+            final base = Networks().coursePath;
+            final needsSlash = !(base.endsWith('/') || media.startsWith('/'));
+            return needsSlash ? "$base/$media" : "$base$media";
+          })();
     _videoPlayerController = VideoPlayerController.network(videoUrl)
       ..initialize()
           .then((_) {
@@ -60,6 +67,63 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
     _videoPlayerController?.dispose();
     _chewieController?.dispose();
     super.dispose();
+  }
+
+  String _safeTimeago(String input) {
+    try {
+      if (input.isEmpty) return '';
+      final dt = DateTime.parse(input);
+      return timeago.format(dt);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  void _openImageViewer(String url) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return Stack(
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.of(ctx).pop(),
+              child: Container(color: Colors.black.withOpacity(0.95)),
+            ),
+            Center(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 5,
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.broken_image, color: Colors.white);
+                  },
+                ),
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(ctx).padding.top + 8,
+              right: 8,
+              child: IconButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                splashRadius: 20,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _refreshComments(CommentProvider commentProvider) async {
@@ -103,12 +167,14 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
           widget.blog.title,
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
       ),
       body: ChangeNotifierProvider(
         create: (_) => CommentProvider()..fetchComments(widget.blog.id),
@@ -117,7 +183,9 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
             return Column(
               children: [
                 // Media Section
-                if (widget.blog.media != null) ...[
+                if (widget.blog.media != null &&
+                    widget.blog.media!.trim().isNotEmpty &&
+                    widget.blog.media!.trim().toLowerCase() != 'null') ...[
                   widget.blog.media!.toLowerCase().endsWith('.mp4')
                       ? _videoPlayerController != null &&
                                 _videoPlayerController!.value.isInitialized
@@ -127,9 +195,85 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                                 child: Chewie(controller: _chewieController!),
                               )
                             : const Center(child: CircularProgressIndicator())
-                      : Image.network(
-                          "${Networks().coursePath}/${widget.blog.media}",
-                          fit: BoxFit.cover,
+                      : Builder(
+                          builder: (context) {
+                            final media = widget.blog.media!.trim();
+                            final url = media.startsWith('http')
+                                ? media
+                                : () {
+                                    final base = Networks().coursePath;
+                                    final needsSlash =
+                                        !(base.endsWith('/') ||
+                                            media.startsWith('/'));
+                                    return needsSlash
+                                        ? "$base/$media"
+                                        : "$base$media";
+                                  }();
+
+                            return GestureDetector(
+                              onTap: () => _openImageViewer(url),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(16.0),
+                                  topRight: Radius.circular(16.0),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 220,
+                                      child: Image.network(
+                                        url,
+                                        fit: BoxFit.cover,
+                                        loadingBuilder:
+                                            (context, child, progress) {
+                                              if (progress == null)
+                                                return child;
+                                              return const Center(
+                                                child: SizedBox(
+                                                  width: 28,
+                                                  height: 28,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2.5,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return const Center(
+                                                child: Icon(
+                                                  Icons.broken_image,
+                                                  color: Colors.grey,
+                                                ),
+                                              );
+                                            },
+                                      ),
+                                    ),
+                                    Positioned(
+                                      right: 8,
+                                      bottom: 8,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.zoom_in,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                 ],
                 Padding(
@@ -215,9 +359,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                                         ],
                                       ),
                                       Text(
-                                        timeago.format(
-                                          DateTime.parse(comment.createdAt),
-                                        ),
+                                        _safeTimeago(comment.createdAt),
                                         style: const TextStyle(
                                           color: Colors.grey,
                                         ),
@@ -248,10 +390,8 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                                                       ),
                                                     ),
                                                     Text(
-                                                      timeago.format(
-                                                        DateTime.parse(
-                                                          reply.createdAt,
-                                                        ),
+                                                      _safeTimeago(
+                                                        reply.createdAt,
                                                       ),
                                                       style: const TextStyle(
                                                         color: Colors.grey,

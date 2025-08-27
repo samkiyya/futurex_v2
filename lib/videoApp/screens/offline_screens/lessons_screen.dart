@@ -169,7 +169,7 @@ class _LessonScreenState extends State<LessonScreen>
             Tab(text: 'Videos'),
             Tab(text: 'Notes'),
             Tab(text: 'Questions'),
-            Tab(text: 'Exams'),
+            // Tab(text: 'Exams'),
           ],
         ),
       ),
@@ -180,7 +180,7 @@ class _LessonScreenState extends State<LessonScreen>
           _buildLessonList(videoLessons, 'video'),
           _buildLessonList(pdfLessons, 'pdf'),
           _buildLessonList(htmlLessons, 'html'),
-          _buildLessonList(examLessons, 'exam'),
+          // _buildLessonList(examLessons, 'exam'),
         ],
       ),
     );

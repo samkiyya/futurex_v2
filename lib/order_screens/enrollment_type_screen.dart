@@ -32,7 +32,7 @@ class _EnrollmentPlansScreenState extends State<EnrollmentPlansScreen> {
           MaterialPageRoute(
             builder: (context) => const CategorySelectionScreen(
               type: "Grade Based ",
-              isFull: true,
+              isFull: false,
             ),
           ),
         );

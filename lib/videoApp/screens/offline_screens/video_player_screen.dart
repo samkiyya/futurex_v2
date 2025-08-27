@@ -337,6 +337,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         appBar: AppBar(
           title: Text(widget.videoTitle, style: const TextStyle(fontSize: 20)),
           backgroundColor: Colors.blueAccent,
+          foregroundColor: Colors.white,
           elevation: 10,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),

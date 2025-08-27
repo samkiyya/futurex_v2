@@ -465,7 +465,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
       ),
       bottomNavigationBar: BottomNav(
         onTabSelected: (index) {},
-        currentSelectedIndex: 3,
+        currentSelectedIndex: 2,
       ),
     );
   }

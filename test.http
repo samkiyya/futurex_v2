@@ -1,1 +1,11 @@
-https://courseservice.futurexapp.net/api/notifications/broadcast-notifications
+### Broadcast Notifications
+GET https://courseservice.futurexapp.net/api/notifications/broadcast-notifications
+
+### get sections by course id
+GET https://sectionservice.futurexapp.net/api/sections/course/114
+
+### get lessons by section id 
+GET https://lessonservice.futurexapp.net/api/lessons/section/563618
+
+### GET courses
+GET https://courseservice.futurexapp.net/api/courses

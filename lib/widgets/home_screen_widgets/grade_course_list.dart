@@ -26,7 +26,9 @@ class CategoryCourseList extends StatelessWidget {
         }
 
         final gradeRange = snapshot.data!;
-        Map<String, List<Course>> categoryCourses = _categorizeByCustomLogic(gradeRange);
+        Map<String, List<Course>> categoryCourses = _categorizeByCustomLogic(
+          gradeRange,
+        );
         List<String> categories = categoryCourses.keys.toList();
 
         // Sort categories so grade-related ones show in order
@@ -49,8 +51,10 @@ class CategoryCourseList extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: categories
-              .map((category) =>
-                  _buildCategoryCard(category, categoryCourses[category]!))
+              .map(
+                (category) =>
+                    _buildCategoryCard(category, categoryCourses[category]!),
+              )
               .toList(),
         );
       },
@@ -58,30 +62,33 @@ class CategoryCourseList extends StatelessWidget {
   }
 
   // ✅ Custom filtering logic based on gradeRange
-Map<String, List<Course>> _categorizeByCustomLogic(String gradeRange) {
-  Map<String, List<Course>> categoryCourses = {};
+  Map<String, List<Course>> _categorizeByCustomLogic(String gradeRange) {
+    Map<String, List<Course>> categoryCourses = {};
 
-  for (var course in courses) {
-    final categoryName = course.category?.catagory ?? '';
-    if (categoryName.isEmpty) continue;
+    for (var course in courses) {
+      final categoryName = course.category?.catagory ?? '';
+      if (categoryName.isEmpty) continue;
 
-    final normalized = categoryName.toLowerCase().replaceAll(RegExp(r'[^0-9]'), '');
+      final normalized = categoryName.toLowerCase().replaceAll(
+        RegExp(r'[^0-9]'),
+        '',
+      );
 
-    final isGrade7 = normalized == '7';
-    final isGrade8 = normalized == '8';
-    final isGrade7Or8 = isGrade7 || isGrade8;
+      final isGrade7 = normalized == '7';
+      final isGrade8 = normalized == '8';
+      final isGrade7Or8 = isGrade7 || isGrade8;
 
-    if (gradeRange == '7-8') {
-      if (!isGrade7Or8) continue;
-    } else {
-      if (isGrade7Or8) continue;
+      if (gradeRange == '7-8') {
+        if (!isGrade7Or8) continue;
+      } else {
+        if (isGrade7Or8) continue;
+      }
+
+      categoryCourses.putIfAbsent(categoryName, () => []).add(course);
     }
 
-    categoryCourses.putIfAbsent(categoryName, () => []).add(course);
+    return categoryCourses;
   }
-
-  return categoryCourses;
-}
 
   Widget _buildCategoryCard(String category, List<Course> categoryCourses) {
     return Column(
@@ -91,15 +98,11 @@ Map<String, List<Course>> _categorizeByCustomLogic(String gradeRange) {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             category,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 38, 82, 119),
-            ),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
-          height: 330,
+          height: 260,
           width: double.infinity,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,

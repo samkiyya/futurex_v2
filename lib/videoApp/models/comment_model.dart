@@ -22,14 +22,36 @@ class Comment {
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
+    int parseInt(dynamic v) {
+      if (v == null) return 0;
+      if (v is int) return v;
+      if (v is String) return int.tryParse(v) ?? 0;
+      return 0;
+    }
+
+    String parseString(dynamic v, {String fallback = ''}) {
+      if (v == null) return fallback;
+      return v.toString();
+    }
+
+    // Ensure createdAt/updatedAt are valid strings to avoid DateTime.parse null errors
+    final created = parseString(
+      json['createdAt'],
+      fallback: DateTime.now().toIso8601String(),
+    );
+    final updated = parseString(
+      json['updatedAt'],
+      fallback: DateTime.now().toIso8601String(),
+    );
+
     return Comment(
-      id: json['id'],
-      notificationId: json['notificationId'],
-      userType: json['userType'],
-      userId: json['user_id'],
-      comment: json['comment'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      id: parseInt(json['id']),
+      notificationId: parseInt(json['notificationId']),
+      userType: parseString(json['userType']),
+      userId: parseInt(json['user_id']),
+      comment: parseString(json['comment']),
+      createdAt: created,
+      updatedAt: updated,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
     );
   }

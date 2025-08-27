@@ -305,7 +305,7 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
           ),
         ),
         SizedBox(
-          height: 300,
+          height: 188,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: courses.length,
@@ -322,13 +322,15 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
     return GestureDetector(
       onTap: () => _navigateToSection(course.id, course.title),
       child: Container(
-        width: MediaQuery.of(context).size.width, // Full screen width
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-        ), // Padding on left and right
+        width: 160,
+        // Full screen width
+        margin: const EdgeInsets.only(right: 16), // Padding on left and right
         child: Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
           child: isHorizontal
               ? _buildHorizontalCourseCard(course)
               : _buildVerticalCourseCard(course),
@@ -339,29 +341,20 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
 
   Widget _buildHorizontalCourseCard(Course course) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
           child: Image.network(
             course.thumbnail,
             width: double.infinity,
-            height: 180,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Container(
-              height: 180,
-              color: Colors.grey[300],
-              child: const Icon(
-                Icons.broken_image,
-                size: 60,
-                color: Colors.grey,
-              ),
-            ),
+            height: 120,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _buildPlaceholderImage(),
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
               return SizedBox(
-                height: 180,
+                height: 120,
                 child: Center(
                   child: CircularProgressIndicator(
                     value: loadingProgress.expectedTotalBytes != null
@@ -374,22 +367,35 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
             },
           ),
         ),
+        const SizedBox(height: 8),
         Expanded(
-          child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-            child: Center(
-              child: Text(
-                course.title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16), // Slightly smaller font
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  course.title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPlaceholderImage() {
+    return Container(
+      height: 120,
+      color: Colors.grey[200],
+      child: const Center(
+        child: Icon(Icons.image, size: 40, color: Colors.grey),
+      ),
     );
   }
 
@@ -403,7 +409,7 @@ class _CourseOnlineScreenState extends State<CourseOnlineScreen> {
               left: Radius.circular(8),
             ),
             child: Image.network(
-              Networks().thumbnailPath + '/${course.thumbnail}',
+              '${Networks().thumbnailPath}/${course.thumbnail}',
               height: 100,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) =>

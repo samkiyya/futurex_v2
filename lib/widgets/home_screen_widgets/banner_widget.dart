@@ -12,7 +12,7 @@ class BannerWidget extends StatefulWidget {
   const BannerWidget({super.key});
 
   @override
-  _BannerWidgetState createState() => _BannerWidgetState();
+  State<BannerWidget> createState() => _BannerWidgetState();
 }
 
 class _BannerWidgetState extends State<BannerWidget> {
@@ -175,7 +175,7 @@ class _BannerWidgetState extends State<BannerWidget> {
                                             );
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
+                                            backgroundColor: Colors.blue,
                                             foregroundColor: Colors.white,
                                           ),
                                           child: const Text('Login'),
@@ -192,8 +192,8 @@ class _BannerWidgetState extends State<BannerWidget> {
                                             );
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                            foregroundColor: Colors.white,
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: Colors.blue,
                                           ),
                                           child: const Text('Register'),
                                         ),

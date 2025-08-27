@@ -14,7 +14,7 @@ class CategorySelectionScreen extends StatefulWidget {
   });
 
   @override
-  _CategorySelectionScreenState createState() =>
+  State<CategorySelectionScreen> createState() =>
       _CategorySelectionScreenState();
 }
 

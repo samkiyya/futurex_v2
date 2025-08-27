@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> getUserDetails() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      firstName = prefs.getString('first_name') ?? 'Alex';
+      firstName = prefs.getString('first_name') ?? 'Guest';
       lastName = prefs.getString('last_name') ?? '';
       grade = prefs.getString('grade') ?? '';
       phone = prefs.getString('phone') ?? 'Not logged in';

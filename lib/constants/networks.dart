@@ -15,17 +15,16 @@ class Networks {
   String bannerPath = "https://lessonservice.futurexapp.net/uploads/banners/";
   String thumbnailPath = "https://courseservice.futurexapp.net";
   String lessonPath = "https://lessonservice.futurexapp.net/";
-    static const String forumService = 'https://courseservice.futurexapp.net/api';
+  static const String forumService = 'https://courseservice.futurexapp.net/api';
 
   //  microservice
   String lessonAPI = "https://lessonservice.futurexapp.net/api";
-
   String sectionAPI = "https://sectionservice.futurexapp.net/api";
   String courseAPI = "https://courseservice.futurexapp.net/api";
   String coursePath = "https://courseservice.futurexapp.net";
   String adminAPI = "https://adminservice.futurexapp.net/api";
   String userAPI = "https://userservice.futurexapp.net/api";
-    String userPath = "https://userservice.futurexapp.net/";
+  String userPath = "https://userservice.futurexapp.net/";
 
   // files
   //  String bannerPath = "https://lessonservice.futurexapp.net/";

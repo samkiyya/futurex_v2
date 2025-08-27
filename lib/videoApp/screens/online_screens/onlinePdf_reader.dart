@@ -13,11 +13,10 @@ class OnlinePdfViewer extends StatefulWidget {
   final String pdfUrl;
   final String title;
 
-  const OnlinePdfViewer({Key? key, required this.pdfUrl, required this.title})
-    : super(key: key);
+  const OnlinePdfViewer({super.key, required this.pdfUrl, required this.title});
 
   @override
-  _OnlinePdfViewerState createState() => _OnlinePdfViewerState();
+  State<OnlinePdfViewer> createState() => _OnlinePdfViewerState();
 }
 
 class _OnlinePdfViewerState extends State<OnlinePdfViewer> {
@@ -32,7 +31,7 @@ class _OnlinePdfViewerState extends State<OnlinePdfViewer> {
   @override
   void initState() {
     super.initState();
-    fullUrl = Networks().lessonPath + widget.pdfUrl;
+    fullUrl = '${Networks().lessonPath}uploads/pdf/${widget.pdfUrl}';
     _initialize();
   }
 

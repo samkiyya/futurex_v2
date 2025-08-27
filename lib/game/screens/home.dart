@@ -54,7 +54,7 @@ class _GameAppScreenState extends State<GameAppScreen> {
       ),
       bottomNavigationBar: BottomNav(
         onTabSelected: (index) {},
-        currentSelectedIndex: 3,
+        currentSelectedIndex: 2,
       ),
     );
   }

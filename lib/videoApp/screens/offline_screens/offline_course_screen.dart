@@ -7,6 +7,7 @@ import 'package:futurex_app/videoApp/provider/home_course_provider.dart';
 import 'package:futurex_app/videoApp/screens/offline_screens/offline_section_screen.dart';
 import 'package:futurex_app/videoApp/screens/online_screens/online_course_screen.dart';
 import 'package:futurex_app/widgets/app_bar.dart';
+import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:futurex_app/widgets/drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +42,10 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
     final provider = Provider.of<HomeCourseProvider>(context, listen: false);
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isConnected = connectivityResult != ConnectivityResult.none;
+      // In this project setup, checkConnectivity returns List<ConnectivityResult>
+      final bool isConnected = connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
+      );
 
       if (isConnected) {
         await provider.fetchCourses();
@@ -193,50 +197,7 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
                   );
                 }
 
-                // Filter courses based on grade range
-                final filteredCourses = _filterCoursesByGrade(provider.courses);
-
-                // Organize by category
-                final categoryCourses = _organizeCoursesByCategory(
-                  filteredCourses,
-                );
-
-                return ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    // Grade 9-12 Sections
-                    if (categoryCourses['Grade 9']?.isNotEmpty ?? false)
-                      _buildCategorySection(
-                        'Grade 9',
-                        categoryCourses['Grade 9']!,
-                      ),
-
-                    if (categoryCourses['Grade 10']?.isNotEmpty ?? false)
-                      _buildCategorySection(
-                        'Grade 10',
-                        categoryCourses['Grade 10']!,
-                      ),
-
-                    if (categoryCourses['Grade 11']?.isNotEmpty ?? false)
-                      _buildCategorySection(
-                        'Grade 11',
-                        categoryCourses['Grade 11']!,
-                      ),
-
-                    if (categoryCourses['Grade 12']?.isNotEmpty ?? false)
-                      _buildCategorySection(
-                        'Grade 12',
-                        categoryCourses['Grade 12']!,
-                      ),
-
-                    // Other Categories
-                    if (categoryCourses['Other']?.isNotEmpty ?? false)
-                      _buildCategorySection(
-                        'Other Courses',
-                        categoryCourses['Other']!,
-                      ),
-                  ],
-                );
+                return _buildCourseContent(provider);
               },
             ),
           ),
@@ -246,53 +207,82 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
         onPressed: _loadCourses,
         child: const Icon(Icons.refresh),
       ),
+      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
-  List<Course> _filterCoursesByGrade(List<Course> courses) {
-    if (_gradeRange == '7-8') {
-      return courses.where((course) {
-        final category = course.category?.catagory ?? '';
-        return category.contains('7') || category.contains('8');
-      }).toList();
-    } else {
-      // Default to 9-12
-      return courses.where((course) {
-        final category = course.category?.catagory ?? '';
-        return category.contains('9') ||
-            category.contains('10') ||
-            category.contains('11') ||
-            category.contains('12');
-      }).toList();
-    }
+  Widget _buildBottomNav() {
+    return BottomNav(onTabSelected: (index) {}, currentSelectedIndex: 1);
   }
 
-  Map<String, List<Course>> _organizeCoursesByCategory(List<Course> courses) {
-    final Map<String, List<Course>> categoryCourses = {
-      'Grade 9': [],
-      'Grade 10': [],
-      'Grade 11': [],
-      'Grade 12': [],
-      'Other': [],
-    };
+  // Match grade range logic with online screen
+  bool _matchesGradeRange(String category) {
+    final range = _gradeRange ?? '9-12';
+    if (range == '7-8') {
+      return category.contains('7') || category.contains('8');
+    }
+    // For 9-12, include anything that is not 7 or 8 (covers other topics too)
+    return !category.contains('7') && !category.contains('8');
+  }
 
-    for (final course in courses) {
-      final category = course.category?.catagory ?? '';
+  // Build content similar to online _buildCourseContent
+  Widget _buildCourseContent(HomeCourseProvider provider) {
+    final List<Widget> sections = [];
 
-      if (category.contains('9')) {
-        categoryCourses['Grade 9']!.add(course);
-      } else if (category.contains('10')) {
-        categoryCourses['Grade 10']!.add(course);
-      } else if (category.contains('11')) {
-        categoryCourses['Grade 11']!.add(course);
-      } else if (category.contains('12')) {
-        categoryCourses['Grade 12']!.add(course);
-      } else {
-        categoryCourses['Other']!.add(course);
+    // Guard
+    final all = provider.courses;
+    if (all.isEmpty) {
+      return Center(child: Text('No data available. Please retry again!'));
+    }
+
+    // New Courses (latest 10)
+    final List<Course> sorted = List<Course>.from(all)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final newCourses = sorted
+        .where((c) => _matchesGradeRange(c.category?.catagory ?? ''))
+        .take(10)
+        .toList();
+    if (newCourses.isNotEmpty) {
+      sections.add(_buildCategorySection('New Courses', newCourses));
+    }
+
+    // Categorized Courses (Grades first, then others)
+    const gradeOrder = ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
+    final Map<String, List<Course>> gradeBuckets = {};
+    final Map<String, List<Course>> otherBuckets = {};
+
+    for (final course in all) {
+      final name = course.category?.catagory ?? '';
+      if (!_matchesGradeRange(name)) continue;
+
+      if (gradeOrder.contains(name)) {
+        gradeBuckets.putIfAbsent(name, () => []).add(course);
+      } else if (name.isNotEmpty) {
+        otherBuckets.putIfAbsent(name, () => []).add(course);
       }
     }
 
-    return categoryCourses;
+    for (final grade in gradeOrder) {
+      final items = gradeBuckets[grade];
+      if (items != null && items.isNotEmpty) {
+        sections.add(_buildCategorySection(grade, items));
+      }
+    }
+
+    // Append other categories in alphabetical order for stability
+    final otherKeys = otherBuckets.keys.toList()..sort();
+    for (final key in otherKeys) {
+      final items = otherBuckets[key]!;
+      if (items.isNotEmpty) {
+        sections.add(_buildCategorySection(key, items));
+      }
+    }
+
+    if (sections.isEmpty) {
+      return Center(child: Text('No data available for selected grade range'));
+    }
+
+    return ListView(padding: const EdgeInsets.all(16), children: sections);
   }
 
   Widget _buildCategorySection(String title, List<Course> courses) {
@@ -307,7 +297,7 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
           ),
         ),
         SizedBox(
-          height: 200,
+          height: 180,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: courses.length,
@@ -343,7 +333,8 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
                                 )
                               : course.thumbnail.isNotEmpty
                               ? Image.network(
-                                  '${Networks().thumbnailPath}${course.thumbnail}',
+                                  // Ensure single slash between base and path
+                                  '${Networks().thumbnailPath}${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}',
                                   height: 120,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
@@ -352,6 +343,7 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
                                 )
                               : _buildPlaceholderImage(),
                         ),
+                        const SizedBox(height: 8),
                         Padding(
                           padding: const EdgeInsets.all(8),
                           child: Column(

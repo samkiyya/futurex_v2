@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class SlidingText extends StatefulWidget {
   final String text;
 
-  SlidingText({required this.text});
+  const SlidingText({super.key, required this.text});
   @override
-  _SlidingTextState createState() => _SlidingTextState();
+  State<SlidingText> createState() => _SlidingTextState();
 }
 
 class _SlidingTextState extends State<SlidingText>
@@ -27,10 +27,7 @@ class _SlidingTextState extends State<SlidingText>
     _animation = Tween<double>(
       begin: 1.0, // Start offscreen (right)
       end: -1.0, // Move offscreen (left)
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.linear,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
 
     // Repeat the animation
     _controller.repeat();
@@ -52,13 +49,10 @@ class _SlidingTextState extends State<SlidingText>
           builder: (context, child) {
             // Calculate position based on animation value
             final dx = _animation.value * (width + 100); // Text width offset
-            return Transform.translate(
-              offset: Offset(dx, 0),
-              child: child,
-            );
+            return Transform.translate(offset: Offset(dx, 0), child: child);
           },
           child: Text(
-           "ከ "+widget.text,
+            "ከ ${widget.text}",
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,

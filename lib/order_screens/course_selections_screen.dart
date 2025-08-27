@@ -162,12 +162,16 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
             child: Column(
               children: courses.map((course) {
                 return CheckboxListTile(
-                  title: Text(course.title),
+                  title: Text(
+                    course.title,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                   value: selectedIds.contains(course.id),
                   onChanged: (_) =>
                       _toggleCourseSelection(category.id, course.id),
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: Colors.blueAccent,
+                  checkColor: Colors.white,
                 );
               }).toList(),
             ),
