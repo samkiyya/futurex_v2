@@ -1,7 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:futurex_app/constants/networks.dart';
 import 'package:futurex_app/videoApp/models/course_model.dart';
 import 'package:futurex_app/videoApp/screens/comment_screen.dart';
 import 'package:futurex_app/videoApp/screens/details_screen.dart';
@@ -11,8 +10,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CourseCard extends StatefulWidget {
   final Course course;
   final VoidCallback? onTap;
+  final bool respectGradeRange;
 
-  const CourseCard({super.key, required this.course, this.onTap});
+  const CourseCard({
+    super.key,
+    required this.course,
+    this.onTap,
+    this.respectGradeRange = true,
+  });
 
   @override
   _CourseCardState createState() => _CourseCardState();
@@ -145,8 +150,9 @@ class _CourseCardState extends State<CourseCard>
         final gradeRange = snapshot.data!;
         final category = widget.course.category?.catagory ?? '';
 
-        // Only display the card if the category matches the grade range
-        if (!_matchesGradeRange(gradeRange, category)) {
+        // Optionally hide the card if the category doesn't match the grade range
+        if (widget.respectGradeRange &&
+            !_matchesGradeRange(gradeRange, category)) {
           return const SizedBox();
         }
 

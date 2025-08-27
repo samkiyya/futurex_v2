@@ -59,27 +59,34 @@ class NewCourseList extends StatelessWidget {
 
   List<Course> _filterNewCoursesByGradeRange(String gradeRange) {
     final now = DateTime.now();
-    final ninetyDaysAgo = now.subtract(const Duration(days: 150));
+    // Approximate five months as 150 days
+    final fiveMonthsAgo = now.subtract(const Duration(days: 150));
 
-    return courses.where((course) {
+    List<Course> filtered = courses.where((course) {
       final categoryName = course.category?.catagory ?? '';
-      final dateAdded = DateTime.tryParse(course.createdAt ?? '');
-      if (dateAdded == null || dateAdded.isBefore(ninetyDaysAgo)) {
+      final updated = DateTime.tryParse(course.updatedAt);
+      final created = DateTime.tryParse(course.createdAt);
+      final dateAdded = updated ?? created;
+      if (dateAdded == null || dateAdded.isBefore(fiveMonthsAgo)) {
         return false;
       }
 
       final is7or8 = categoryName.contains('7') || categoryName.contains('8');
+      return gradeRange == '7-8' ? is7or8 : !is7or8;
+    }).toList();
 
-      if (gradeRange == '7-8') {
-        return is7or8;
-      } else {
-        return !is7or8;
-      }
-    }).toList()..sort((a, b) {
-      final dateA = DateTime.tryParse(a.createdAt ?? '');
-      final dateB = DateTime.tryParse(b.createdAt ?? '');
-      if (dateA == null || dateB == null) return 0;
-      return dateB.compareTo(dateA);
-    });
+    int compareByDateDesc(Course a, Course b) {
+      final da =
+          DateTime.tryParse(a.updatedAt) ?? DateTime.tryParse(a.createdAt);
+      final db =
+          DateTime.tryParse(b.updatedAt) ?? DateTime.tryParse(b.createdAt);
+      if (da == null && db == null) return 0;
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return db.compareTo(da);
+    }
+
+    filtered.sort(compareByDateDesc);
+    return filtered;
   }
 }

@@ -34,10 +34,32 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
 
   Future<void> _fetchCategories() async {
     try {
-      final response = await _dio.get('${Networks().courseAPI}/catagories/all');
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        _categories = data.map((json) => Category.fromJson(json)).toList();
+      final primary = await _dio.get('${Networks().courseAPI}/categories');
+      Response fallback;
+      Response use;
+      if (primary.statusCode == 200) {
+        use = primary;
+      } else {
+        fallback = await _dio.get('${Networks().courseAPI}/catagories');
+        use = fallback;
+      }
+
+      if (use.statusCode == 200) {
+        final raw = use.data;
+        final List<dynamic> data = raw is List
+            ? raw
+            : (raw is Map<String, dynamic>
+                  ? (raw['data'] as List?) ?? (raw['categories'] as List?) ?? []
+                  : []);
+        _categories = data
+            .map(
+              (json) => Category.fromJson(
+                json is Map<String, dynamic>
+                    ? json
+                    : Map<String, dynamic>.from(json),
+              ),
+            )
+            .toList();
         setState(() {
           _isLoading = false;
         });
@@ -49,13 +71,13 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Failed to load categories: ${response.statusCode}';
+          _errorMessage = 'Unable to load categories. Please try again.';
         });
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to load categories: $e';
+        _errorMessage = 'Unable to load categories. Please try again.';
       });
     }
   }
@@ -63,7 +85,7 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
   Future<void> _fetchCoursesForCategory(int categoryId) async {
     try {
       final response = await _dio.get(
-        '${Networks().courseAPI}/catagory/$categoryId',
+        '${Networks().courseAPI}/courses/semister/$categoryId',
         options: Options(headers: {'Accept': 'application/json'}),
       );
 
@@ -194,9 +216,28 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
           ? Center(
-              child: Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red),
+                  const SizedBox(height: 8),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _isLoading = true;
+                        _errorMessage = null;
+                      });
+                      _fetchCategories();
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
             )
           : SafeArea(

@@ -156,11 +156,21 @@ class Course {
       comment_count: json['comment_count'] is int
           ? json['comment_count']
           : int.tryParse(json['comment_count']?.toString() ?? '0') ?? 0,
-      category: json['categoryOrSemester'] != null
-          ? (json['categoryOrSemester'] is String
-                ? Category.fromJson(jsonDecode(json['categoryOrSemester']))
-                : Category.fromJson(json['categoryOrSemester']))
-          : null,
+      category: (() {
+        final cat = json['categoryOrSemester'] ?? json['category'];
+        if (cat == null) return null;
+        if (cat is String) {
+          try {
+            return Category.fromJson(jsonDecode(cat));
+          } catch (_) {
+            return null;
+          }
+        }
+        if (cat is Map<String, dynamic>) {
+          return Category.fromJson(cat);
+        }
+        return null;
+      })(),
       localThumbnailPath: json['localThumbnailPath']?.toString(),
     );
   }
@@ -209,7 +219,12 @@ class Category {
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      catagory: json['categoryOrSemester']?.toString() ?? "",
+      // Prefer 'catagory' (as returned by /api/categories),
+      // then fall back to 'categoryOrSemester' or 'name'.
+      catagory:
+          (json['catagory'] ?? json['categoryOrSemester'] ?? json['name'])
+              ?.toString() ??
+          "",
     );
   }
 

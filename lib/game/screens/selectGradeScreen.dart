@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GradeSelectionPage extends StatelessWidget {
+  const GradeSelectionPage({super.key});
+
   void _showGradeSelectionModal(BuildContext context) {
     showDialog(
       context: context,
