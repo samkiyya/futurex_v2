@@ -31,7 +31,7 @@ class _OnlinePdfViewerState extends State<OnlinePdfViewer> {
   @override
   void initState() {
     super.initState();
-    fullUrl = '${Networks().lessonPath}uploads/pdf/${widget.pdfUrl}';
+    fullUrl = '${Networks().lessonPath}${widget.pdfUrl}';
     _initialize();
   }
 

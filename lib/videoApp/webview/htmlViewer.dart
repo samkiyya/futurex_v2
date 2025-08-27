@@ -43,7 +43,7 @@ class _HtmlViewerState extends State<HtmlViewer> {
 
     final fullUrl = widget.url.startsWith('http')
         ? widget.url
-        : '${baseUrl}uploads/html/${widget.url}';
+        : '${baseUrl}${widget.url}';
     final hash = md5.convert(utf8.encode(fullUrl)).toString();
     final fileName = '${widget.title.replaceAll(" ", "_")}_$hash.html';
 
