@@ -71,8 +71,9 @@ class _OfflineCourseCardState extends State<OfflineCourseCard>
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Image.network(
-                              Networks().thumbnailPath +
-                                  '/${widget.course.thumbnail}',
+                              widget.course.thumbnail.startsWith('https://')
+                                  ? widget.course.thumbnail
+                                  : "${Networks().thumbnailPath}/${widget.course.thumbnail}",
                               loadingBuilder:
                                   (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;

@@ -8,4 +8,4 @@ GET https://sectionservice.futurexapp.net/api/sections/course/114
 GET https://lessonservice.futurexapp.net/api/lessons/section/563618
 
 ### GET courses
-GET https://courseservice.futurexapp.net/api/courses
+GET https://courseservice.futurexapp.net/api/course

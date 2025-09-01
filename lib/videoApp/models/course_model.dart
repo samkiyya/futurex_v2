@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class Course {
   final int id;
   final String title;
-   
+
   final String short_description;
   final String description;
   final List<String> outcomes;
@@ -33,7 +33,7 @@ class Course {
   Course({
     required this.id,
     required this.title,
-   
+
     required this.short_description,
     required this.description,
     required this.outcomes,
@@ -61,18 +61,31 @@ class Course {
   });
 
   factory Course.fromJson(Map<String, dynamic> json) {
+    int parsedId = json['id'] is int
+        ? json['id']
+        : int.tryParse(json['id']?.toString() ?? '0') ?? 0;
+
+    String? parsedThumbnail = json['thumbnail']?.toString();
+    if (parsedThumbnail == null || parsedThumbnail.isEmpty) {
+      parsedThumbnail =
+          "https://courseservice.futurexapp.net/uploads/course_thumbnails/course_thumbnail_default_$parsedId.jpg";
+    }
     List<String> parseStringList(dynamic input) {
       if (input == null) return [];
       if (input is String) {
         try {
           final decoded = jsonDecode(input);
-          if (decoded is List) return List<String>.from(decoded.map((x) => x.toString()));
+          if (decoded is List) {
+            return List<String>.from(decoded.map((x) => x.toString()));
+          }
         } catch (e) {
           debugPrint('Error parsing string list: $input, Error: $e');
           return input.split(',').map((e) => e.trim()).toList();
         }
       }
-      if (input is List) return List<String>.from(input.map((x) => x.toString()));
+      if (input is List) {
+        return List<String>.from(input.map((x) => x.toString()));
+      }
       return [];
     }
 
@@ -81,63 +94,93 @@ class Course {
       if (input is String) {
         try {
           final decoded = jsonDecode(input);
-          if (decoded is List) return List<int>.from(decoded.map((x) => int.tryParse(x.toString()) ?? 0));
+          if (decoded is List) {
+            return List<int>.from(
+              decoded.map((x) => int.tryParse(x.toString()) ?? 0),
+            );
+          }
         } catch (e) {
           debugPrint('Error parsing int list: $input, Error: $e');
-          return input.split(',').map((e) => int.tryParse(e.trim()) ?? 0).toList();
+          return input
+              .split(',')
+              .map((e) => int.tryParse(e.trim()) ?? 0)
+              .toList();
         }
       }
-      if (input is List) return List<int>.from(input.map((x) => int.tryParse(x.toString()) ?? 0));
+      if (input is List) {
+        return List<int>.from(
+          input.map((x) => int.tryParse(x.toString()) ?? 0),
+        );
+      }
       return [];
     }
 
     return Course(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       title: json['title']?.toString() ?? "",
-   
+
       short_description: json['short_description']?.toString() ?? "",
       description: json['description']?.toString() ?? "",
       outcomes: parseStringList(json['outcomes']),
       language: json['language']?.toString() ?? "",
-      category_id: json['category_id'] is int ? json['category_id'] : int.tryParse(json['category_id']?.toString() ?? ''),
+      category_id: json['category_id'] is int
+          ? json['category_id']
+          : int.tryParse(json['category_id']?.toString() ?? ''),
       section: parseIntList(json['section']),
       requirements: parseStringList(json['requirements']),
       price: json['price']?.toString() ?? "0.00",
       discount_flag: (json['discount_flag'] is bool)
           ? json['discount_flag']
           : (json['discount_flag'] is int)
-              ? json['discount_flag'] == 1
-              : json['discount_flag']?.toString().toLowerCase() == 'true',
+          ? json['discount_flag'] == 1
+          : json['discount_flag']?.toString().toLowerCase() == 'true',
       discounted_price: json['discounted_price']?.toString() ?? "0.00",
-      thumbnail: json['thumbnail']?.toString() ?? "",
+      thumbnail: parsedThumbnail,
       video_url: json['video_url']?.toString() ?? "",
       is_top_course: (json['is_top_course'] is bool)
           ? json['is_top_course']
           : (json['is_top_course'] is int)
-              ? json['is_top_course'] == 1
-              : json['is_top_course']?.toString().toLowerCase() == 'true',
+          ? json['is_top_course'] == 1
+          : json['is_top_course']?.toString().toLowerCase() == 'true',
       status: json['status']?.toString() ?? "draft",
       video: json['video']?.toString() ?? "",
       is_free_course: (json['is_free_course'] is bool)
           ? json['is_free_course']
           : (json['is_free_course'] is int)
-              ? json['is_free_course'] == 1
-              : json['is_free_course']?.toString().toLowerCase() == 'true',
+          ? json['is_free_course'] == 1
+          : json['is_free_course']?.toString().toLowerCase() == 'true',
       multi_instructor: (json['multi_instructor'] is bool)
           ? json['multi_instructor']
           : (json['multi_instructor'] is int)
-              ? json['multi_instructor'] == 1
-              : json['multi_instructor']?.toString().toLowerCase() == 'true',
+          ? json['multi_instructor'] == 1
+          : json['multi_instructor']?.toString().toLowerCase() == 'true',
       creator: json['creator']?.toString() ?? "",
       createdAt: json['createdAt']?.toString() ?? "",
       updatedAt: json['updatedAt']?.toString() ?? "",
-      like_count: json['like_count'] is int ? json['like_count'] : int.tryParse(json['like_count']?.toString() ?? '0') ?? 0,
-      comment_count: json['comment_count'] is int ? json['comment_count'] : int.tryParse(json['comment_count']?.toString() ?? '0') ?? 0,
-      category: json['category'] != null
-          ? (json['category'] is String
-              ? Category.fromJson(jsonDecode(json['category']))
-              : Category.fromJson(json['category']))
-          : null,
+      like_count: json['like_count'] is int
+          ? json['like_count']
+          : int.tryParse(json['like_count']?.toString() ?? '0') ?? 0,
+      comment_count: json['comment_count'] is int
+          ? json['comment_count']
+          : int.tryParse(json['comment_count']?.toString() ?? '0') ?? 0,
+      category: (() {
+        // Prefer embedded 'category' object; legacy 'categoryOrSemester' is no longer provided
+        final cat = json['category'] ?? json['categoryOrSemester'];
+        if (cat == null) return null;
+        if (cat is String) {
+          try {
+            return Category.fromJson(jsonDecode(cat));
+          } catch (_) {
+            return null;
+          }
+        }
+        if (cat is Map<String, dynamic>) {
+          return Category.fromJson(cat);
+        }
+        return null;
+      })(),
       localThumbnailPath: json['localThumbnailPath']?.toString(),
     );
   }
@@ -146,7 +189,7 @@ class Course {
     return {
       'id': id,
       'title': title,
-   
+
       'short_description': short_description,
       'description': description,
       'outcomes': jsonEncode(outcomes),
@@ -183,15 +226,15 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      catagory: json['catagory']?.toString() ?? "",
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      // Prefer 'catagory' (as returned by /api/categories), then fall back to 'name'
+      catagory: (json['catagory'] ?? json['name'])?.toString() ?? "",
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'catagory': catagory,
-    };
+    return {'id': id, 'catagory': catagory};
   }
 }

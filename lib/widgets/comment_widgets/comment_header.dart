@@ -21,7 +21,7 @@ class CommentHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Image.network(
-          Networks().thumbnailPath + '/$thumbnail',
+          '${Networks().thumbnailPath}/$thumbnail',
           height: 250,
           width: double.infinity,
           fit: BoxFit.cover,

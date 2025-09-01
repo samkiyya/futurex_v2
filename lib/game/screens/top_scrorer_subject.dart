@@ -132,10 +132,20 @@ class _TopScorerBySubjectState extends State<TopScorerBySubject> {
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: Image.network(
-                                network.gurl + '/' + subject.image,
+                                '${network.gurl}/${subject.image}',
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      color: Colors.grey[300],
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                               ),
                             ),
                             title: Text(

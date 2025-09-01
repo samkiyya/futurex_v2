@@ -33,7 +33,9 @@ class BannerProvider extends ChangeNotifier {
             'Failed to load banners (Status: ${response.statusCode})';
       }
     } catch (e) {
-      _errorMessage = 'Failed to load banners: $e';
+      // check for network error
+      _errorMessage =
+          'Failed to load banners please check your network or try again later';
     }
 
     _isLoading = false;

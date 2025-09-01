@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:futurex_app/constants/constants.dart';
 import 'package:futurex_app/videoApp/db/course_db.dart';
 import 'package:futurex_app/videoApp/db/medea_service.dart';
-import 'package:futurex_app/videoApp/models/course_model.dart';
+import 'package:futurex_app/videoApp/models/course_model.dart' as models;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeCourseProvider with ChangeNotifier {
@@ -12,14 +12,100 @@ class HomeCourseProvider with ChangeNotifier {
   final api = Networks();
   final MediaService _mediaService = MediaService();
 
-  List<Course> _courses = [];
+  List<models.Course> _courses = [];
+  List<models.Category> _categories = [];
   bool _isLoading = false;
+  bool _isCategoriesLoading = false;
   String userId = "";
   String _errorMessage = "";
+  String _categoriesError = "";
 
-  List<Course> get courses => _courses;
+  // Quick lookup by id
+  final Map<int, models.Category> _categoryById = {};
+
+  List<models.Course> get courses => _courses;
+  List<models.Category> get categories => _categories;
   bool get isLoading => _isLoading;
+  bool get isCategoriesLoading => _isCategoriesLoading;
   String get errorMessage => _errorMessage;
+  String get categoriesError => _categoriesError;
+
+  models.Category? getCategoryById(int? id) {
+    if (id == null) return null;
+    return _categoryById[id];
+  }
+
+  Future<void> fetchCategories() async {
+    _isCategoriesLoading = true;
+    _categoriesError = "";
+    notifyListeners();
+
+    // Primary working endpoint (misspelled): /api/catagories
+    final primaryUrl = '${Networks().courseAPI}/catagories';
+    // Secondary newer endpoint
+    final secondaryUrl = '${Networks().courseAPI}/categories';
+    Response? response;
+    try {
+      response = await _dio.get(
+        primaryUrl,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 10),
+          headers: {'Accept': 'application/json'},
+        ),
+      );
+    } on DioException catch (_) {
+      // Try secondary endpoint
+      try {
+        response = await _dio.get(
+          secondaryUrl,
+          options: Options(
+            receiveTimeout: const Duration(seconds: 15),
+            sendTimeout: const Duration(seconds: 10),
+            headers: {'Accept': 'application/json'},
+          ),
+        );
+      } on DioException catch (e) {
+        _categoriesError = 'Unable to load categories. Please try again.';
+        _isCategoriesLoading = false;
+        developer.log(
+          'Category fetch error',
+          error: e,
+          stackTrace: e.stackTrace,
+        );
+        notifyListeners();
+        return;
+      }
+    }
+
+    try {
+      if (response.statusCode == 200) {
+        final raw = response.data;
+        final List<dynamic> data = raw is List
+            ? raw
+            : (raw is Map<String, dynamic>
+                  ? (raw['data'] as List?) ?? (raw['categories'] as List?) ?? []
+                  : []);
+
+        _categories = data
+            .map((j) => models.Category.fromJson(Map<String, dynamic>.from(j)))
+            .toList();
+        _categoryById
+          ..clear()
+          ..addEntries(_categories.map((c) => MapEntry(c.id, c)));
+        _categoriesError = "";
+      } else {
+        _categoriesError = 'Unable to load categories. Please try again.';
+      }
+    } catch (e, stack) {
+      developer.log('Category parse error', error: e, stackTrace: stack);
+      _categoriesError = 'Unable to load categories. Please try again.';
+    } finally {
+      _isCategoriesLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchCourses() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -46,6 +132,20 @@ class HomeCourseProvider with ChangeNotifier {
         for (var json in jsonList) {
           final courseMap = Map<String, dynamic>.from(json);
 
+          // Inject category display name from fetched categories
+          final catIdRaw = courseMap['category_id'];
+          final catId = catIdRaw is int
+              ? catIdRaw
+              : int.tryParse(catIdRaw?.toString() ?? '');
+          final matched = getCategoryById(catId);
+          if (matched != null) {
+            // Normalize to the shape Course.fromJson expects now: 'category'
+            courseMap['category'] = {
+              'id': matched.id,
+              'catagory': matched.catagory,
+            };
+          }
+
           if (courseMap['thumbnail'] != null &&
               courseMap['thumbnail'].isNotEmpty) {
             final fileName =
@@ -70,7 +170,9 @@ class HomeCourseProvider with ChangeNotifier {
           courseMaps.add(courseMap);
         }
 
-        _courses = courseMaps.map((json) => Course.fromJson(json)).toList();
+        _courses = courseMaps
+            .map((json) => models.Course.fromJson(json))
+            .toList();
 
         try {
           final inserted = await CourseDatabaseHelper().insertCourses(
@@ -143,14 +245,14 @@ class HomeCourseProvider with ChangeNotifier {
         _courses = courseMaps
             .map((json) {
               try {
-                return Course.fromJson(json);
+                return models.Course.fromJson(json);
               } catch (e) {
                 debugPrint('Error parsing course: $json, Error: $e');
                 return null;
               }
             })
             .where((course) => course != null)
-            .cast<Course>()
+            .cast<models.Course>()
             .toList();
         _errorMessage = "";
         debugPrint("Courses loaded from local db: ${_courses.length}");

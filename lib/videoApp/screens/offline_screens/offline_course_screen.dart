@@ -334,7 +334,9 @@ class _OfflineCourseScreenState extends State<OfflineCourseScreen> {
                               : course.thumbnail.isNotEmpty
                               ? Image.network(
                                   // Ensure single slash between base and path
-                                  '${Networks().thumbnailPath}${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}',
+                                  course.thumbnail.startsWith('https://')
+                                      ? course.thumbnail
+                                      : '${Networks().thumbnailPath}${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}',
                                   height: 120,
                                   width: double.infinity,
                                   fit: BoxFit.cover,

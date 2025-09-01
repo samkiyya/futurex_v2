@@ -13,6 +13,29 @@ class TelegramOrderNotifier {
     '779768487', //samuel
   ];
 
+  static String _sanitizePhone(String phone) {
+    var p = phone.trim().replaceAll(
+      RegExp(r'[^0-9+]'),
+      '',
+    ); // keep only digits and +
+
+    if (p.startsWith('09')) {
+      p = '+251' + p.substring(1);
+    } else if (p.startsWith('07')) {
+      p = '+251' + p.substring(1);
+    } else if (p.startsWith('2519') || p.startsWith('2517')) {
+      p = '+$p';
+    } else if (p.startsWith('+2519') || p.startsWith('+2517')) {
+      // already correct
+    } else {
+      // fallback: assume Ethiopia local number
+      if (p.startsWith('9') || p.startsWith('7')) {
+        p = '+251$p';
+      }
+    }
+    return p;
+  }
+
   static final Dio _dio = Dio();
 
   /// Sends the order summary with the receipt image to Telegram Help.
@@ -71,10 +94,14 @@ class TelegramOrderNotifier {
     required List<Category> categories,
     required List<Course> courses,
   }) {
+    final sanitizedPhone = _sanitizePhone(phone);
+    final telegramLink =
+        '<a href="https://t.me/$sanitizedPhone">$sanitizedPhone</a>';
+
     final b = StringBuffer();
     b.writeln('<b>New Enrollment Receipt</b>');
     b.writeln('Name: <b>$fullName</b>');
-    b.writeln('Phone: <b>$phone</b>');
+    b.writeln('Phone: <b>$telegramLink</b>');
     b.writeln(
       'Plan: <b>$plan</b>${priceLabel != null && priceLabel.isNotEmpty ? ' ($priceLabel)' : ''}',
     );

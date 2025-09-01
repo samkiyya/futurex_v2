@@ -171,7 +171,7 @@ class _BlogGridScreenState extends State<BlogGridScreen> {
                               child: _isVideo(blog.media)
                                   ? _buildVideoWithPlayIcon(blog.media, blog.id)
                                   : Image.network(
-                                      Networks().userPath + "/${blog.media}",
+                                      "${Networks().userPath}/${blog.media}",
                                       height: 100,
                                       width: double.infinity,
                                       fit: BoxFit.cover,

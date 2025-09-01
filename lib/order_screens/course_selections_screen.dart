@@ -34,10 +34,39 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
 
   Future<void> _fetchCategories() async {
     try {
-      final response = await _dio.get('${Networks().courseAPI}/catagories/all');
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        _categories = data.map((json) => Category.fromJson(json)).toList();
+      // Server exposes /catagories (misspelled) as the primary route.
+      final primary = await _dio.get(
+        '${Networks().courseAPI}/catagories',
+        options: Options(headers: {'Accept': 'application/json'}),
+      );
+      Response use;
+      if (primary.statusCode == 200) {
+        use = primary;
+      } else {
+        // Try newer /categories only
+        final secondary = await _dio.get(
+          '${Networks().courseAPI}/categories',
+          options: Options(headers: {'Accept': 'application/json'}),
+        );
+        use = secondary;
+      }
+
+      if (use.statusCode == 200) {
+        final raw = use.data;
+        final List<dynamic> data = raw is List
+            ? raw
+            : (raw is Map<String, dynamic>
+                  ? (raw['data'] as List?) ?? (raw['categories'] as List?) ?? []
+                  : []);
+        _categories = data
+            .map(
+              (json) => Category.fromJson(
+                json is Map<String, dynamic>
+                    ? json
+                    : Map<String, dynamic>.from(json),
+              ),
+            )
+            .toList();
         setState(() {
           _isLoading = false;
         });
@@ -49,13 +78,13 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Failed to load categories: ${response.statusCode}';
+          _errorMessage = 'Unable to load categories. Please try again.';
         });
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to load categories: $e';
+        _errorMessage = 'Unable to load categories. Please try again.';
       });
     }
   }
@@ -68,18 +97,29 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
       );
 
       if (response.statusCode == 200) {
-        List<Course> courses = (response.data as List)
-            .map((json) => Course.fromJson(json))
+        final list = response.data as List<dynamic>;
+        final courses = list
+            .map(
+              (json) => Course.fromJson(
+                json is Map<String, dynamic>
+                    ? json
+                    : Map<String, dynamic>.from(json),
+              ),
+            )
             .toList();
         setState(() {
           _categoryCourses[categoryId] = courses;
           _selectedCourseIds[categoryId] = [];
         });
       } else {
-        _categoryCourses[categoryId] = [];
+        setState(() {
+          _categoryCourses[categoryId] = [];
+        });
       }
     } catch (_) {
-      _categoryCourses[categoryId] = [];
+      setState(() {
+        _categoryCourses[categoryId] = [];
+      });
     }
   }
 
@@ -194,9 +234,28 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
           ? Center(
-              child: Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red),
+                  const SizedBox(height: 8),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _isLoading = true;
+                        _errorMessage = null;
+                      });
+                      _fetchCategories();
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
             )
           : SafeArea(

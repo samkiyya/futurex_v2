@@ -53,8 +53,13 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize media_kit player
-    _player = Player();
+    // Initialize media_kit player with optimized settings for faster loading
+    _player = Player(
+      configuration: PlayerConfiguration(
+        // Enable faster buffering and lower latency
+        bufferSize: 32 * 1024 * 1024, // 32MB buffer for smoother playback
+      ),
+    );
     _controller = media_kit.VideoController(_player);
 
     // Fetch video qualities and load the initial stream
@@ -88,12 +93,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
       if (_streamCache.containsKey(videoId)) {
         setState(() {
           _availableStreams = _streamCache[videoId]!;
-          _selectedStream = _availableStreams.isNotEmpty
-              ? _availableStreams.firstWhere(
-                  (stream) => stream is MuxedStreamInfo,
-                  orElse: () => _availableStreams.first,
-                )
-              : null;
+          _selectedStream = _getLowestQualityStream(_availableStreams);
           _isLoadingQualities = false;
         });
         if (_selectedStream != null) {
@@ -105,12 +105,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
       final streams = await LessonService.fetchVideoStreams(widget.videoUrl);
       setState(() {
         _availableStreams = streams;
-        _selectedStream = streams.isNotEmpty
-            ? streams.firstWhere(
-                (stream) => stream is MuxedStreamInfo,
-                orElse: () => streams.first,
-              )
-            : null;
+        _selectedStream = _getLowestQualityStream(streams);
         _isLoadingQualities = false;
       });
       // Cache the streams locally
@@ -135,6 +130,47 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
     return null;
   }
 
+  // Get the lowest quality stream for faster loading
+  StreamInfo? _getLowestQualityStream(List<StreamInfo> streams) {
+    if (streams.isEmpty) return null;
+
+    // First, try to find muxed streams (video + audio combined) as they're faster to load
+    final muxedStreams = streams.whereType<MuxedStreamInfo>().toList();
+    if (muxedStreams.isNotEmpty) {
+      // Sort by quality label (assuming lower numbers = lower quality)
+      muxedStreams.sort((a, b) {
+        final aQuality = _parseQualityNumber(a.qualityLabel);
+        final bQuality = _parseQualityNumber(b.qualityLabel);
+        return aQuality.compareTo(bQuality);
+      });
+      return muxedStreams.first; // Return lowest quality muxed stream
+    }
+
+    // If no muxed streams, use video-only streams
+    final videoStreams = streams.whereType<VideoOnlyStreamInfo>().toList();
+    if (videoStreams.isNotEmpty) {
+      videoStreams.sort((a, b) {
+        final aQuality = _parseQualityNumber(a.qualityLabel);
+        final bQuality = _parseQualityNumber(b.qualityLabel);
+        return aQuality.compareTo(bQuality);
+      });
+      return videoStreams.first; // Return lowest quality video stream
+    }
+
+    // Fallback to first stream if no specific type found
+    return streams.first;
+  }
+
+  // Parse quality label to get a comparable number (e.g., "360p" -> 360)
+  int _parseQualityNumber(String qualityLabel) {
+    final match = RegExp(r'(\d+)').firstMatch(qualityLabel);
+    if (match != null) {
+      return int.parse(match.group(1)!);
+    }
+    // If no number found, assign high number to push it to the end
+    return 9999;
+  }
+
   // Load a specific stream into the player
   Future<void> _loadStream(StreamInfo stream) async {
     setState(() {
@@ -144,12 +180,21 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
     // If it's a muxed stream, just play it. If it's video-only, attach external audio track.
     if (stream is MuxedStreamInfo) {
       // Ensure we revert to automatic audio track selection when switching back to muxed
-      await _player.open(Media(streamUrl));
+      await _player.open(
+        Media(streamUrl),
+        play: false,
+      ); // Don't auto-play initially
       await _player.setAudioTrack(AudioTrack.auto());
       await _player.setVolume(_currentVolume * 100);
       if (_currentSpeed != 1.0) {
         await _player.setRate(_currentSpeed);
       }
+      // Start playing after a brief delay to allow buffering
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted && !_player.state.playing) {
+          _player.play();
+        }
+      });
       if (mounted) setState(() => _hasOpenedMedia = true);
       return;
     }
@@ -200,7 +245,12 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
       if (_currentSpeed != 1.0) {
         await _player.setRate(_currentSpeed);
       }
-      await _player.play();
+      // Start playing after a brief delay to allow buffering
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && !_player.state.playing) {
+          _player.play();
+        }
+      });
       if (mounted) setState(() => _hasOpenedMedia = true);
       return;
     }
@@ -721,7 +771,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                         video['lesson_type'] ?? '',
                         video['video_type'] ?? '',
                         video['link'] ?? '',
-                        video['attachment_type'],
+                        video['attachment_type'] ?? '',
                       );
                       return GestureDetector(
                         onTap: () {
@@ -731,7 +781,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                             MaterialPageRoute(
                               builder: (context) => OnlineVideoPlayerScreen(
                                 videoUrl: videoUrl,
-                                title: video['lesson'],
+                                title: video['title'] ?? 'Untitled Lesson',
                                 lessons: widget.lessons,
                               ),
                             ),
@@ -750,6 +800,17 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                                   width: 140,
                                   height: 110,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        width: 140,
+                                        height: 110,
+                                        color: Colors.grey.shade300,
+                                        child: const Icon(
+                                          Icons.broken_image,
+                                          size: 50,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                 )
                               else
                                 const SizedBox(

@@ -53,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeData() async {
     final provider = Provider.of<HomeCourseProvider>(context, listen: false);
     if (widget.isOnline) {
+      // Load categories first so courses can be mapped to category names
+      await provider.fetchCategories();
       await provider.fetchCourses();
     } else {
       await provider.getCoursesFromStorage();

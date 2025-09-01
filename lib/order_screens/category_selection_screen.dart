@@ -32,34 +32,71 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
 
   Future<void> _fetchCategories() async {
     final dio = Dio();
-    String apiUrl = '${Networks().courseAPI}/catagories/all';
+    final primaryUrl = '${Networks().courseAPI}/catagories';
+    final secondaryUrl = '${Networks().courseAPI}/categories';
+    Response? response;
 
     try {
-      final response = await dio.get(apiUrl);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> responseData = response.data;
+      response = await dio.get(
+        primaryUrl,
+        options: Options(headers: {'Accept': 'application/json'}),
+      );
+    } catch (_) {
+      try {
+        response = await dio.get(
+          secondaryUrl,
+          options: Options(headers: {'Accept': 'application/json'}),
+        );
+      } catch (_) {
         setState(() {
-          _categories = responseData
-              .map((json) => Category.fromJson(json))
-              .toList();
+          _isLoading = false;
+          _errorMessage = 'Unable to load categories. Please try again.';
+        });
+        return;
+      }
+    }
+
+    try {
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<dynamic> list = data is List
+            ? data
+            : (data is Map<String, dynamic>
+                  ? (data['data'] as List?) ??
+                        (data['categories'] as List?) ??
+                        []
+                  : []);
+
+        final parsed = list
+            .map(
+              (json) => Category.fromJson(
+                json is Map<String, dynamic>
+                    ? json
+                    : Map<String, dynamic>.from(json),
+              ),
+            )
+            .toList();
+
+        setState(() {
+          _categories = parsed;
           _isLoading = false;
 
-          // If isFull is true, select all categories automatically
           if (widget.isFull) {
-            _selectedCategoryIds.addAll(_categories.map((c) => c.id).toList());
+            _selectedCategoryIds
+              ..clear()
+              ..addAll(_categories.map((c) => c.id));
           }
         });
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Failed to load categories: ';
+          _errorMessage = 'Unable to load categories. Please try again.';
         });
       }
-    } catch (e) {
+    } catch (_) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to load categories: ';
+        _errorMessage = 'Unable to load categories. Please try again.';
       });
     }
   }
@@ -177,9 +214,25 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                   const Center(child: CircularProgressIndicator())
                 else if (_errorMessage != null)
                   Center(
-                    child: Text(
-                      "Error: failed to load categories please try again later",
-                      style: const TextStyle(color: Colors.red),
+                    child: Column(
+                      children: [
+                        Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _isLoading = true;
+                              _errorMessage = null;
+                            });
+                            _fetchCategories();
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
                     ),
                   )
                 else
