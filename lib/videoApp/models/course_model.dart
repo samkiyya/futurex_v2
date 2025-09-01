@@ -61,6 +61,15 @@ class Course {
   });
 
   factory Course.fromJson(Map<String, dynamic> json) {
+    int parsedId = json['id'] is int
+        ? json['id']
+        : int.tryParse(json['id']?.toString() ?? '0') ?? 0;
+
+    String? parsedThumbnail = json['thumbnail']?.toString();
+    if (parsedThumbnail == null || parsedThumbnail.isEmpty) {
+      parsedThumbnail =
+          "https://courseservice.futurexapp.net/uploads/course_thumbnails/course_thumbnail_default_$parsedId.jpg";
+    }
     List<String> parseStringList(dynamic input) {
       if (input == null) return [];
       if (input is String) {
@@ -128,7 +137,7 @@ class Course {
           ? json['discount_flag'] == 1
           : json['discount_flag']?.toString().toLowerCase() == 'true',
       discounted_price: json['discounted_price']?.toString() ?? "0.00",
-      thumbnail: json['thumbnail']?.toString() ?? "",
+      thumbnail: parsedThumbnail,
       video_url: json['video_url']?.toString() ?? "",
       is_top_course: (json['is_top_course'] is bool)
           ? json['is_top_course']
@@ -157,7 +166,8 @@ class Course {
           ? json['comment_count']
           : int.tryParse(json['comment_count']?.toString() ?? '0') ?? 0,
       category: (() {
-        final cat = json['categoryOrSemester'] ?? json['category'];
+        // Prefer embedded 'category' object; legacy 'categoryOrSemester' is no longer provided
+        final cat = json['category'] ?? json['categoryOrSemester'];
         if (cat == null) return null;
         if (cat is String) {
           try {
@@ -219,12 +229,8 @@ class Category {
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      // Prefer 'catagory' (as returned by /api/categories),
-      // then fall back to 'categoryOrSemester' or 'name'.
-      catagory:
-          (json['catagory'] ?? json['categoryOrSemester'] ?? json['name'])
-              ?.toString() ??
-          "",
+      // Prefer 'catagory' (as returned by /api/categories), then fall back to 'name'
+      catagory: (json['catagory'] ?? json['name'])?.toString() ?? "",
     );
   }
 

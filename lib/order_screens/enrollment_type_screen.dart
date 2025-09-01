@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:futurex_app/order_screens/category_selection_screen.dart';
 import 'package:futurex_app/order_screens/course_selections_screen.dart';
 

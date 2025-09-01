@@ -27,7 +27,7 @@ class OnlineCourseProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _dio.get('${Networks().courseAPI}/course');
+      final response = await _dio.get('${Networks().courseAPI}/courses');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;

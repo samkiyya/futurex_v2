@@ -209,8 +209,9 @@ class _CourseCardState extends State<CourseCard>
                                   fit: BoxFit.contain,
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
+                                        if (loadingProgress == null) {
                                           return child;
+                                        }
                                         return SizedBox(
                                           height: 120,
                                           child: Center(

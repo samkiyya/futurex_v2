@@ -27,6 +27,7 @@ class LoginProvider extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        print("Login successful ${response.data}");
         print("sssssss");
         final responseData = response.data;
         // "code" may not exist in all backend success responses, so check both
@@ -57,7 +58,7 @@ class LoginProvider extends ChangeNotifier {
       } else if (response.statusCode == 404) {
         errorMessage = "Account does not exist!";
       } else if (response.statusCode == 401) {
-        errorMessage = "Wrong password!";
+        errorMessage = "Wrong password or phone number!";
       } else {
         errorMessage = "Failed to connect to the server. Please try again.";
       }

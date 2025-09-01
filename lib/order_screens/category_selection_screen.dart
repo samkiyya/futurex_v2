@@ -32,19 +32,25 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
 
   Future<void> _fetchCategories() async {
     final dio = Dio();
-    final primaryUrl = '${Networks().courseAPI}/categories';
-    final fallbackUrl = '${Networks().courseAPI}/catagories/all';
+    final primaryUrl = '${Networks().courseAPI}/catagories';
+    final secondaryUrl = '${Networks().courseAPI}/categories';
     Response? response;
 
     try {
-      response = await dio.get(primaryUrl);
+      response = await dio.get(
+        primaryUrl,
+        options: Options(headers: {'Accept': 'application/json'}),
+      );
     } catch (_) {
       try {
-        response = await dio.get(fallbackUrl);
-      } catch (e) {
+        response = await dio.get(
+          secondaryUrl,
+          options: Options(headers: {'Accept': 'application/json'}),
+        );
+      } catch (_) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Failed to load categories: $e';
+          _errorMessage = 'Unable to load categories. Please try again.';
         });
         return;
       }
@@ -61,32 +67,36 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                         []
                   : []);
 
+        final parsed = list
+            .map(
+              (json) => Category.fromJson(
+                json is Map<String, dynamic>
+                    ? json
+                    : Map<String, dynamic>.from(json),
+              ),
+            )
+            .toList();
+
         setState(() {
-          _categories = list
-              .map(
-                (json) => Category.fromJson(
-                  json is Map<String, dynamic>
-                      ? json
-                      : Map<String, dynamic>.from(json),
-                ),
-              )
-              .toList();
+          _categories = parsed;
           _isLoading = false;
 
           if (widget.isFull) {
-            _selectedCategoryIds.addAll(_categories.map((c) => c.id));
+            _selectedCategoryIds
+              ..clear()
+              ..addAll(_categories.map((c) => c.id));
           }
         });
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Failed to load categories: ${response?.statusCode}';
+          _errorMessage = 'Unable to load categories. Please try again.';
         });
       }
-    } catch (e) {
+    } catch (_) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to parse categories: $e';
+        _errorMessage = 'Unable to load categories. Please try again.';
       });
     }
   }

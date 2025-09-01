@@ -40,10 +40,10 @@ class HomeCourseProvider with ChangeNotifier {
     _categoriesError = "";
     notifyListeners();
 
-    // Primary endpoint as provided: /api/categories
-    final primaryUrl = '${Networks().courseAPI}/categories';
-    // Fallback to legacy misspelled endpoint used elsewhere in app
-    final fallbackUrl = '${Networks().courseAPI}/catagories/all';
+    // Primary working endpoint (misspelled): /api/catagories
+    final primaryUrl = '${Networks().courseAPI}/catagories';
+    // Secondary newer endpoint
+    final secondaryUrl = '${Networks().courseAPI}/categories';
     Response? response;
     try {
       response = await _dio.get(
@@ -51,21 +51,28 @@ class HomeCourseProvider with ChangeNotifier {
         options: Options(
           receiveTimeout: const Duration(seconds: 15),
           sendTimeout: const Duration(seconds: 10),
+          headers: {'Accept': 'application/json'},
         ),
       );
     } on DioException catch (_) {
-      // Try fallback
+      // Try secondary endpoint
       try {
         response = await _dio.get(
-          fallbackUrl,
+          secondaryUrl,
           options: Options(
             receiveTimeout: const Duration(seconds: 15),
             sendTimeout: const Duration(seconds: 10),
+            headers: {'Accept': 'application/json'},
           ),
         );
       } on DioException catch (e) {
-        _categoriesError = _getErrorMessage(e);
+        _categoriesError = 'Unable to load categories. Please try again.';
         _isCategoriesLoading = false;
+        developer.log(
+          'Category fetch error',
+          error: e,
+          stackTrace: e.stackTrace,
+        );
         notifyListeners();
         return;
       }
@@ -73,9 +80,12 @@ class HomeCourseProvider with ChangeNotifier {
 
     try {
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data is List
-            ? response.data
-            : (response.data as Map<String, dynamic>)['data'] ?? [];
+        final raw = response.data;
+        final List<dynamic> data = raw is List
+            ? raw
+            : (raw is Map<String, dynamic>
+                  ? (raw['data'] as List?) ?? (raw['categories'] as List?) ?? []
+                  : []);
 
         _categories = data
             .map((j) => models.Category.fromJson(Map<String, dynamic>.from(j)))
@@ -85,11 +95,11 @@ class HomeCourseProvider with ChangeNotifier {
           ..addEntries(_categories.map((c) => MapEntry(c.id, c)));
         _categoriesError = "";
       } else {
-        _categoriesError = 'Failed to load categories';
+        _categoriesError = 'Unable to load categories. Please try again.';
       }
     } catch (e, stack) {
       developer.log('Category parse error', error: e, stackTrace: stack);
-      _categoriesError = 'Failed to parse categories: $e';
+      _categoriesError = 'Unable to load categories. Please try again.';
     } finally {
       _isCategoriesLoading = false;
       notifyListeners();
@@ -107,7 +117,7 @@ class HomeCourseProvider with ChangeNotifier {
       notifyListeners();
 
       final response = await _dio.get(
-        '${Networks().courseAPI}/course',
+        '${Networks().courseAPI}/courses',
         options: Options(
           receiveTimeout: const Duration(seconds: 15),
           sendTimeout: const Duration(seconds: 10),
@@ -129,11 +139,10 @@ class HomeCourseProvider with ChangeNotifier {
               : int.tryParse(catIdRaw?.toString() ?? '');
           final matched = getCategoryById(catId);
           if (matched != null) {
-            // Normalize to the shape Course.fromJson expects
-            courseMap['categoryOrSemester'] = {
+            // Normalize to the shape Course.fromJson expects now: 'category'
+            courseMap['category'] = {
               'id': matched.id,
-              // Keep key 'categoryOrSemester' inside for compatibility with current Category.fromJson
-              'categoryOrSemester': matched.catagory,
+              'catagory': matched.catagory,
             };
           }
 

@@ -24,9 +24,7 @@ class SubjectCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       elevation: 2.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12.0),
@@ -47,41 +45,43 @@ class SubjectCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: image != null && image!.isNotEmpty
-                    ? image!.startsWith('http')
-                        ? Image.network(
-                            image!,
-                            height: 150,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
+                    ? image!.startsWith('https://')
+                          ? Image.network(
+                              image!,
                               height: 150,
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: Icon(
-                                  Icons.broken_image,
-                                  color: Colors.grey,
-                                  size: 50,
-                                ),
-                              ),
-                            ),
-                          )
-                        : Image.file(
-                            File(image!),
-                            height: 150,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    height: 150,
+                                    color: Colors.grey[300],
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                        size: 50,
+                                      ),
+                                    ),
+                                  ),
+                            )
+                          : Image.file(
+                              File(image!),
                               height: 150,
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: Icon(
-                                  Icons.broken_image,
-                                  color: Colors.grey,
-                                  size: 50,
-                                ),
-                              ),
-                            ),
-                          )
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    height: 150,
+                                    color: Colors.grey[300],
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                        size: 50,
+                                      ),
+                                    ),
+                                  ),
+                            )
                     : Container(
                         height: 150,
                         color: Colors.grey[300],
@@ -97,10 +97,7 @@ class SubjectCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 'Category: $category, Year: $year',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
               ),
             ],
           ),

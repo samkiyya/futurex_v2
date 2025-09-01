@@ -39,7 +39,17 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.videoUrl == null || widget.videoUrl.trim().isEmpty) {
+      debugPrint(
+        '[OnlinePlayer] widget.videoUrl is null or empty! Value: ${widget.videoUrl}',
+      );
+    }
     final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+    if (videoId == null || videoId.isEmpty) {
+      debugPrint(
+        '[OnlinePlayer] Could not extract videoId from videoUrl: ${widget.videoUrl}',
+      );
+    }
     _controller = YoutubePlayerController(
       initialVideoId: videoId ?? '',
       flags: const YoutubePlayerFlags(
@@ -134,6 +144,39 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
     final screenSize = MediaQuery.of(context).size;
     final isLandscape = screenSize.width > screenSize.height;
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+    if (widget.videoUrl == null ||
+        widget.videoUrl.trim().isEmpty ||
+        videoId == null ||
+        videoId.isEmpty) {
+      return Scaffold(
+        appBar: _isFullscreen
+            ? null
+            : AppBar(
+                title: Text(
+                  widget.title,
+                  style: TextStyle(color: Colors.white),
+                ),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 60),
+              const SizedBox(height: 16),
+              const Text(
+                'Invalid or missing video URL',
+                style: TextStyle(fontSize: 20, color: Colors.red),
+              ),
+              const SizedBox(height: 8),
+              Text('videoUrl: \'${widget.videoUrl}\''),
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: _isFullscreen
           ? null
@@ -258,7 +301,25 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                     itemBuilder: (context, index) {
                       final video = widget.lessons[index];
                       final videoUrl = video["video_url"];
-                      if (videoUrl == null) return Text("");
+                      final title =
+                          (video['lesson'] ?? video['title'] ?? widget.title)
+                              ?.toString() ??
+                          'Untitled Lesson';
+                      if (videoUrl == null) {
+                        debugPrint(
+                          '[OnlinePlayer] Lesson at index $index missing video_url. Lesson: $video',
+                        );
+                        return const ListTile(
+                          leading: Icon(Icons.error, color: Colors.red),
+                          title: Text('Video unavailable'),
+                          subtitle: Text('Missing video URL'),
+                        );
+                      }
+                      if (title == 'Untitled Lesson') {
+                        debugPrint(
+                          '[OnlinePlayer] Lesson at index $index missing title. Lesson: $video',
+                        );
+                      }
                       final thumbnailUrl = _getVideoThumbnail(videoUrl);
                       LessonCheckerService.getLessonType(
                         video['lesson_type'] as String?,
@@ -273,12 +334,8 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => OnlineVideoPlayerScreen(
-                                videoUrl: videoUrl,
-                                title:
-                                    (video['lesson'] ??
-                                            video['title'] ??
-                                            widget.title)
-                                        .toString(),
+                                videoUrl: videoUrl ?? '',
+                                title: title,
                                 lessons: widget.lessons,
                               ),
                             ),
@@ -297,6 +354,17 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                                   width: 140,
                                   height: 110,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        width: 140,
+                                        height: 110,
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.broken_image,
+                                          size: 50,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                 )
                               else
                                 const SizedBox(

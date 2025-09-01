@@ -34,14 +34,21 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
 
   Future<void> _fetchCategories() async {
     try {
-      final primary = await _dio.get('${Networks().courseAPI}/categories');
-      Response fallback;
+      // Server exposes /catagories (misspelled) as the primary route.
+      final primary = await _dio.get(
+        '${Networks().courseAPI}/catagories',
+        options: Options(headers: {'Accept': 'application/json'}),
+      );
       Response use;
       if (primary.statusCode == 200) {
         use = primary;
       } else {
-        fallback = await _dio.get('${Networks().courseAPI}/catagories');
-        use = fallback;
+        // Try newer /categories only
+        final secondary = await _dio.get(
+          '${Networks().courseAPI}/categories',
+          options: Options(headers: {'Accept': 'application/json'}),
+        );
+        use = secondary;
       }
 
       if (use.statusCode == 200) {
@@ -85,23 +92,34 @@ class _CourseSelectionScreenState extends State<CourseSelectionScreen> {
   Future<void> _fetchCoursesForCategory(int categoryId) async {
     try {
       final response = await _dio.get(
-        '${Networks().courseAPI}/courses/semister/$categoryId',
+        '${Networks().courseAPI}/catagory/$categoryId',
         options: Options(headers: {'Accept': 'application/json'}),
       );
 
       if (response.statusCode == 200) {
-        List<Course> courses = (response.data as List)
-            .map((json) => Course.fromJson(json))
+        final list = response.data as List<dynamic>;
+        final courses = list
+            .map(
+              (json) => Course.fromJson(
+                json is Map<String, dynamic>
+                    ? json
+                    : Map<String, dynamic>.from(json),
+              ),
+            )
             .toList();
         setState(() {
           _categoryCourses[categoryId] = courses;
           _selectedCourseIds[categoryId] = [];
         });
       } else {
-        _categoryCourses[categoryId] = [];
+        setState(() {
+          _categoryCourses[categoryId] = [];
+        });
       }
     } catch (_) {
-      _categoryCourses[categoryId] = [];
+      setState(() {
+        _categoryCourses[categoryId] = [];
+      });
     }
   }
 

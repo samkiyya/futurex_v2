@@ -147,16 +147,28 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
           // Log silently; don't block the user on Telegram failure.
         }
       } else {
-        final errorMessage =
-            response.data is Map && response.data['message'] != null
-            ? response.data['message']
-            : 'Unknown error';
+        String errorMessage = 'Unknown error';
+        final data = response.data;
+        if (data is Map && data['message'] is String) {
+          errorMessage = data['message'] as String;
+        } else if (data is String && data.trim().isNotEmpty) {
+          errorMessage = data;
+        }
         throw Exception('Failed to submit order: $errorMessage');
       }
     } catch (e) {
       String errorMessage = 'An error occurred. Please try again.';
       if (e is DioException && e.response != null) {
-        errorMessage = e.response?.data?['message'] ?? errorMessage;
+        final data = e.response!.data;
+        if (data is Map && data['message'] is String) {
+          errorMessage = data['message'] as String;
+        } else if (data is String && data.trim().isNotEmpty) {
+          errorMessage = data;
+        } else if ((e.message ?? '').isNotEmpty) {
+          errorMessage = e.message!;
+        } else if ((e.response?.statusMessage ?? '').isNotEmpty) {
+          errorMessage = e.response!.statusMessage!;
+        }
       }
       ScaffoldMessenger.of(
         context,

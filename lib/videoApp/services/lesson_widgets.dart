@@ -127,6 +127,16 @@ class Widgets {
                     width: 180,
                     height: 120,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 140,
+                      height: 110,
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.broken_image,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+                    ),
                   )
                 : const SizedBox(
                     width: 100,
