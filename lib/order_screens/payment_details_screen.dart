@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -7,7 +7,9 @@ import 'package:futurex_app/videoApp/models/course_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:futurex_app/order_screens/telegram_order_notifier.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
 
 class PaymentDetailsScreen extends StatefulWidget {
   final List<Category> selectedCategories;
@@ -22,7 +24,7 @@ class PaymentDetailsScreen extends StatefulWidget {
   });
 
   @override
-  _PaymentDetailsScreenState createState() => _PaymentDetailsScreenState();
+  State<PaymentDetailsScreen> createState() => _PaymentDetailsScreenState();
 }
 
 class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
@@ -37,7 +39,6 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     if (t.contains('single course') || t.contains('course')) {
       return 'Single Course Plan';
     }
-    // Infer from selection if type string is inconsistent
     if (widget.selectedCourses.isNotEmpty) return 'Single Course Plan';
     if (widget.selectedCategories.length > 1) return 'Premium Plan';
     if (widget.selectedCategories.length == 1) return 'Single Grade Plan';
@@ -95,9 +96,8 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
     }
 
     final fullName = '${userInfo['firstName']} ${userInfo['lastName']}';
-    final orderType = widget.selectedCourses.isNotEmpty
-        ? 'courses'
-        : 'categories';
+    final orderType =
+        widget.selectedCourses.isNotEmpty ? 'courses' : 'categories';
 
     setState(() => _isLoading = true);
 
@@ -130,22 +130,25 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Receipt submitted successfully!')),
         );
-        // Send the same details to Telegram help automatically.
+
         final plan = _normalizePlan(widget.type);
         final priceLabel = _planPriceLabel(plan);
-        try {
-          await TelegramOrderNotifier.sendOrder(
-            fullName: fullName,
-            phone: userInfo['phone'] ?? '',
-            plan: plan,
-            priceLabel: priceLabel,
-            categories: widget.selectedCategories,
-            courses: widget.selectedCourses,
-            receipt: _receiptImage,
-          );
-        } catch (e) {
-          // Log silently; don't block the user on Telegram failure.
-        }
+
+        final plainMessage = _buildPlainTextCaption(
+          fullName: fullName,
+          phone: userInfo['phone'] ?? '',
+          plan: plan,
+          priceLabel: priceLabel,
+          categories: widget.selectedCategories,
+          courses: widget.selectedCourses,
+        );
+
+        // 👉 Direct Telegram notify, no dialog
+        await _openTelegramWithReceiptDirect(plainMessage);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Help notified on Telegram')),
+        );
       } else {
         String errorMessage = 'Unknown error';
         final data = response.data;
@@ -422,6 +425,82 @@ extension on _PaymentDetailsScreenState {
       );
     }
     return [Wrap(children: items)];
+  }
+}
+
+extension _ShareHelpers on _PaymentDetailsScreenState {
+  String _buildPlainTextCaption({
+    required String fullName,
+    required String phone,
+    required String plan,
+    String? priceLabel,
+    required List<Category> categories,
+    required List<Course> courses,
+  }) {
+    final b = StringBuffer();
+    b.writeln('New Enrollment Receipt');
+    b.writeln('Name: $fullName');
+    b.writeln('Phone: $phone');
+    b.writeln(
+      'Plan: $plan${priceLabel != null && priceLabel.isNotEmpty ? ' ($priceLabel)' : ''}',
+    );
+
+    if (courses.isNotEmpty) {
+      b.writeln('\nCourses (${courses.length}):');
+      for (final c in courses.take(10)) {
+        b.writeln('- ${c.title}');
+      }
+      final remaining = courses.length - 10;
+      if (remaining > 0) b.writeln('+$remaining more');
+    } else if (categories.isNotEmpty) {
+      if (categories.length == 1) {
+        b.writeln('\nSelected Grade: ${categories.first.catagory}');
+      } else {
+        b.writeln('\nGrades (${categories.length}):');
+        for (final g in categories.take(10)) {
+          b.writeln('- ${g.catagory}');
+        }
+        final remaining = categories.length - 10;
+        if (remaining > 0) b.writeln('+$remaining more');
+      }
+    }
+
+    b.writeln('\nPlease verify and activate.');
+    return b.toString();
+  }
+
+  Future<void> _openTelegramWithReceiptDirect(String message) async {
+    await Clipboard.setData(ClipboardData(text: message));
+
+    const telegramUsername = 'futurexhelp';
+    final encodedText = Uri.encodeComponent(message);
+
+    final telegramUris = <Uri>[
+      Uri.parse('tg://resolve?domain=$telegramUsername&text=$encodedText'),
+      Uri.parse('https://t.me/$telegramUsername?text=$encodedText'),
+    ];
+
+    bool opened = false;
+    for (final uri in telegramUris) {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        opened = true;
+        break;
+      }
+    }
+
+    if (!opened) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open Telegram, message copied.')),
+      );
+    }
+
+    if (_receiptImage != null && await _receiptImage!.exists()) {
+      try {
+        await Future.delayed(const Duration(milliseconds: 400));
+        await Share.shareXFiles([XFile(_receiptImage!.path)], text: message);
+      } catch (_) {}
+    }
   }
 }
 
