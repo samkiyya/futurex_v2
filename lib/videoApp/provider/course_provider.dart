@@ -21,7 +21,7 @@ class CourseProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      final response = await _dio.get(Networks().courseAPI + '/course');
+      final response = await _dio.get('${Networks().courseAPI}/course');
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = response.data;
         _courses = jsonList.map((json) => Course.fromJson(json)).toList();

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
+import 'package:futurex_app/game/provider/upload_provider.dart';
 import 'package:futurex_app/game/screens/selectGradeScreen.dart';
 import 'package:futurex_app/widgets/app_bar.dart';
 import 'package:futurex_app/widgets/bottomNav.dart';
 import 'package:futurex_app/widgets/drawer.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
+import 'package:futurex_app/game/screens/html_viewer_screen.dart';
 
 class GameTypeSelectionScreen extends StatefulWidget {
   const GameTypeSelectionScreen({super.key});
@@ -188,23 +193,124 @@ class _GameTypeSelectionScreenState extends State<GameTypeSelectionScreen> {
     return Scaffold(
       appBar: GradientAppBar(title: "Games"),
       drawer: const MyDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: _games.length,
-          itemBuilder: (context, index) {
-            return Column(
-              children: [
-                _GameTypeCard(
-                  label: _games[index]['label'],
-                  description: _games[index]['description'],
-                  icon: _games[index]['icon'],
-                  onPressed: () => _checkFirstRun(index),
-                ),
-                const SizedBox(height: 16),
-              ],
-            );
-          },
+      body: ChangeNotifierProvider(
+        create: (_) => UploadProvider()..load(),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            children: [
+              // existing game types
+              ...List.generate(_games.length, (index) {
+                return Column(
+                  children: [
+                    _GameTypeCard(
+                      label: _games[index]['label'],
+                      description: _games[index]['description'],
+                      icon: _games[index]['icon'],
+                      onPressed: () => _checkFirstRun(index),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              }),
+
+              // HTML Games header
+              const SizedBox(height: 8),
+              const Text(
+                'HTML Games',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+
+              // uploads list from provider
+              Consumer<UploadProvider>(
+                builder: (context, prov, _) {
+                  if (prov.loading)
+                    return const Center(child: CircularProgressIndicator());
+                  if (prov.error != null) return Text('Error: ${prov.error}');
+                  if (prov.uploads.isEmpty)
+                    return const Text('No HTML games available');
+
+                  return Column(
+                    children: prov.uploads.map((u) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            contentPadding: const EdgeInsets.all(0),
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: const Icon(
+                                Icons.html,
+                                color: Colors.blue,
+                                size: 24,
+                              ),
+                            ),
+                            title: Text(u.title),
+                            subtitle: Text(u.htmlFilePath.split('/').last),
+                            trailing: prov.downloading[u.id] == true
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (u.localPath != null)
+                                        IconButton(
+                                          icon: const Icon(Icons.open_in_new),
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    HtmlViewerScreen(
+                                                      path: u.localPath!,
+                                                      title: u.title,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      IconButton(
+                                        icon: const Icon(Icons.download),
+                                        onPressed: () async {
+                                          print(
+                                            '[UI] download button pressed for id=${u.id}',
+                                          );
+                                          await prov.downloadOne(u);
+                                          // after download open automatically
+                                          if (u.localPath != null && mounted) {
+                                            print(
+                                              '[UI] opening downloaded file ${u.localPath}',
+                                            );
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    HtmlViewerScreen(
+                                                      path: u.localPath!,
+                                                      title: u.title,
+                                                    ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNav(

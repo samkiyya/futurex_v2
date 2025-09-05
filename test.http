@@ -9,3 +9,7 @@ GET https://lessonservice.futurexapp.net/api/lessons/section/563618
 
 ### GET courses
 GET https://courseservice.futurexapp.net/api/course
+
+### GET Game
+GET https://adminservice.futurexapp.net/api/uploads
+getall

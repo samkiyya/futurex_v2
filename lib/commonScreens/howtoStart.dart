@@ -31,9 +31,7 @@ class _VideoWithRegistrationScreenState
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 20),
-        Text(
-          'Step 1. መመዝገብ - Register የሚለውን ምልክት በመንካት ፎርሙን ሞልቶ መመዝገብ',
-        ),
+        Text('Step 1. መመዝገብ - Register የሚለውን ምልክት በመንካት ፎርሙን ሞልቶ መመዝገብ'),
         SizedBox(height: 10),
         Text(
           'Step 2. መክፈል - አሁኑኑ ለመጀመር በመረጡት የክፍያ አማራጭ ገንዘቡን በኢትዮጵያ ንግድ ባንክ የባንክ ቁጥር 1000530747445 ገቢ ማድረግ። በቀላሉ ማለትም በሞባይል *889# ወይም በ CBE አፕሊኬሽን ወይም በ Tele-Birr ወዲያው መክፈል ይችላሉ።',
@@ -52,18 +50,23 @@ class _VideoWithRegistrationScreenState
       children: [
         Text("የክፍያ አማራጮች በሚገባቸው ሰነዶች ላይ ማብራሪያ ያግኛሉ።"),
         SizedBox(height: 10),
-        Text("1. አንድ ኮርስ መርጦ መግዛት",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          "1. አንድ ኮርስ መርጦ መግዛት",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         SizedBox(height: 5),
         Text("• 499 ብር ከፍለው የመረጡትን 1 ኮርስ ያገኛሉ"),
         Text("• ያንን ኮርስ ብቻ Download ማድረግና ያለ ኢንተርኔት ማጥናት ይችላሉ"),
         Text("• ሌላ ኮርስ ማግኘት ሲፈልጉ ተጨማሪ 499 ይከፍላሉ"),
         SizedBox(height: 10),
-        Text("2. በክፍል ደረጃችን ያሉ ኮርሶችን ማግኘት",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          "2. በክፍል ደረጃችን ያሉ ኮርሶችን ማግኘት",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         SizedBox(height: 5),
         Text(
-            "• በመረጡት የክፍል ደረጃ ያሉ ትምህርቶችን ያገኛሉ (9ኛ ክፍል ከሆኑ የ 9ኛ ክፍል ት/ቶችን ያገኛሉ፤ 10ኛ ከሆኑ የ10ኛ ክፍል ት/ቶችን ያገኛሉ...ወዘተ)"),
+          "• በመረጡት የክፍል ደረጃ ያሉ ትምህርቶችን ያገኛሉ (9ኛ ክፍል ከሆኑ የ 9ኛ ክፍል ት/ቶችን ያገኛሉ፤ 10ኛ ከሆኑ የ10ኛ ክፍል ት/ቶችን ያገኛሉ...ወዘተ)",
+        ),
         Text("• በክፍል ደረጃዎ ያሉ ት/ቶች ላይ የወጡ Shortnotes (አጤሬራ) ያገኛሉ"),
         Text("• ኮርሶቹን Download ማድረግና ያለ ኢንተርኔት ማጥናት ይችላሉ"),
         Text("• የሌላ ክፍል ደረጃ ኮርስ ሲፈልጉ ተጨማሪ ይከፍላሉ"),
@@ -73,7 +76,8 @@ class _VideoWithRegistrationScreenState
         SizedBox(height: 5),
         Text("• 2999 ብር ከፍለው ሁሉንም ኮርስ ያገኛሉ"),
         Text(
-            "• ሁሉንም ኮርስ ማለትም ከ [totalRows] በላይ ኮርሶች ያገኛሉ (አሁን ያሉትንም ወደፊት የሚለቀቁትንም ጨምሮ)"),
+          "• ሁሉንም ኮርስ ማለትም ከ [totalRows] በላይ ኮርሶች ያገኛሉ (አሁን ያሉትንም ወደፊት የሚለቀቁትንም ጨምሮ)",
+        ),
         Text("• የሁሉንም ትምህርቶች Shortnote (አጤሬራ) ያገኛሉ"),
         Text("• ሁሉንም ኮርስ Download ማድረግና ያለ ኢንተርኔት ማጥናት ይችላሉ"),
         Text("• ከዚህ በኋላ ደግመው አይከፍሉም"),
@@ -144,8 +148,11 @@ class _VideoWithRegistrationScreenState
 
   // Method to load the video URL asynchronously
   Future<void> _loadVideoUrl() async {
-    final response = await http.get(Uri.parse(
-        'https://111.21.27.29.futurex.et/video_changer.php?action=howtostart'));
+    final response = await http.get(
+      Uri.parse(
+        'https://111.21.27.29.futurex.et/video_changer.php?action=howtostart',
+      ),
+    );
 
     if (response.statusCode == 200) {
       // Parse the response body and extract the URL
@@ -153,8 +160,9 @@ class _VideoWithRegistrationScreenState
       final String youtubeVideoUrl = data['url'];
 
       // Extract the YouTube video ID from the URL
-      final String youtubeVideoId =
-          YoutubePlayer.convertUrlToId(youtubeVideoUrl)!;
+      final String youtubeVideoId = YoutubePlayer.convertUrlToId(
+        youtubeVideoUrl,
+      )!;
 
       // Create the YouTube Player Controller with the fetched video ID
       _controller = YoutubePlayerController(
@@ -224,8 +232,9 @@ class _VideoWithRegistrationScreenState
               ElevatedButton(
                 onPressed: () => _onTabSelected(0),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _selectedIndex == 0 ? Colors.blue : Colors.grey,
+                  backgroundColor: _selectedIndex == 0
+                      ? Colors.blue
+                      : Colors.grey,
                 ),
                 child: const Text(
                   'እንዴት ልጀምር?',
@@ -235,8 +244,9 @@ class _VideoWithRegistrationScreenState
               ElevatedButton(
                 onPressed: () => _onTabSelected(1),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _selectedIndex == 1 ? Colors.blue : Colors.grey,
+                  backgroundColor: _selectedIndex == 1
+                      ? Colors.blue
+                      : Colors.grey,
                 ),
                 child: const Text(
                   'የክፍያ አማራጮች',
@@ -246,13 +256,11 @@ class _VideoWithRegistrationScreenState
               ElevatedButton(
                 onPressed: () => _onTabSelected(2),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _selectedIndex == 2 ? Colors.blue : Colors.grey,
+                  backgroundColor: _selectedIndex == 2
+                      ? Colors.blue
+                      : Colors.grey,
                 ),
-                child: const Text(
-                  'FAQ',
-                  style: TextStyle(color: Colors.white),
-                ),
+                child: const Text('FAQ', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -261,9 +269,7 @@ class _VideoWithRegistrationScreenState
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: SingleChildScrollView(
-                child: _tabContents[_selectedIndex],
-              ),
+              child: SingleChildScrollView(child: _tabContents[_selectedIndex]),
             ),
           ),
           // Telegram link to open Telegram
