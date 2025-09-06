@@ -1,6 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import '../model/upload_model.dart';
+import 'package:futurex_app/game/model/upload_model.dart';
 
 class UploadDb {
   static final UploadDb _instance = UploadDb._internal();
@@ -21,7 +21,7 @@ class UploadDb {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (Database db, int version) async {
         await db.execute('''
         CREATE TABLE uploads (
@@ -31,9 +31,15 @@ class UploadDb {
           createdAt TEXT,
           updatedAt TEXT,
           fileExists INTEGER,
-          localPath TEXT
+          localPath TEXT,
+          onlineUrl TEXT
         )
-      ''');
+        ''');
+      },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE uploads ADD COLUMN onlineUrl TEXT');
+        }
       },
     );
   }

@@ -12,4 +12,3 @@ GET https://courseservice.futurexapp.net/api/course
 
 ### GET Game
 GET https://adminservice.futurexapp.net/api/uploads
-getall
