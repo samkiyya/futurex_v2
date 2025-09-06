@@ -57,7 +57,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
     _player = Player(
       configuration: PlayerConfiguration(
         // Enable faster buffering and lower latency
-        bufferSize: 32 * 1024 * 1024, // 32MB buffer for smoother playback
+        bufferSize: 8 * 1024 * 1024, // 8MB buffer for smoother playback
       ),
     );
     _controller = media_kit.VideoController(_player);
@@ -101,14 +101,51 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
         }
         return;
       }
-      // Fetch streams if not cached
-      final streams = await LessonService.fetchVideoStreams(widget.videoUrl);
+      // Fetch streams if not cached with timeout & fallback to direct manifest
+      List<StreamInfo> streams = [];
+      try {
+        streams = await LessonService.fetchVideoStreams(
+          widget.videoUrl,
+        ).timeout(const Duration(seconds: 6));
+      } catch (_) {
+        // ignore & fallback below
+      }
+
+      if (streams.isEmpty) {
+        // Fallback: query YouTube manifest directly for muxed/video-only streams
+        final yt = YoutubeExplode();
+        try {
+          final manifest = await yt.videos.streams.getManifest(
+            VideoId(widget.videoUrl),
+          );
+          // Combine muxed + video-only (prefer muxed later)
+          streams = <StreamInfo>[...manifest.muxed, ...manifest.videoOnly];
+          // Also opportunistically cache best audio URL for this video
+          final bestAudio = manifest.audioOnly.toList()
+            ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
+          if (bestAudio.isNotEmpty) {
+            _audioUrlCache[videoId] = bestAudio.first.url.toString();
+          }
+        } catch (_) {
+        } finally {
+          yt.close();
+        }
+      }
+
+      if (streams.isEmpty) {
+        setState(() {
+          _isLoadingQualities = false;
+        });
+        _showOverlay("Couldn't load streams. Check connection.");
+        return;
+      }
+
+      // Update state & cache
       setState(() {
         _availableStreams = streams;
         _selectedStream = _getLowestQualityStream(streams);
         _isLoadingQualities = false;
       });
-      // Cache the streams locally
       _streamCache[videoId] = streams;
       if (_selectedStream != null) {
         _loadStream(_selectedStream!);
@@ -180,21 +217,12 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
     // If it's a muxed stream, just play it. If it's video-only, attach external audio track.
     if (stream is MuxedStreamInfo) {
       // Ensure we revert to automatic audio track selection when switching back to muxed
-      await _player.open(
-        Media(streamUrl),
-        play: false,
-      ); // Don't auto-play initially
+      await _player.open(Media(streamUrl), play: true);
       await _player.setAudioTrack(AudioTrack.auto());
       await _player.setVolume(_currentVolume * 100);
       if (_currentSpeed != 1.0) {
         await _player.setRate(_currentSpeed);
       }
-      // Start playing after a brief delay to allow buffering
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted && !_player.state.playing) {
-          _player.play();
-        }
-      });
       if (mounted) setState(() => _hasOpenedMedia = true);
       return;
     }
@@ -234,8 +262,8 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
         // Otherwise play silent video-only as last resort
       }
 
-      // Open video without auto-play, attach audio, then start
-      await _player.open(Media(streamUrl), play: false);
+      // Open video & start, then attach audio if available
+      await _player.open(Media(streamUrl), play: true);
       if (audioUrl != null) {
         await _player.setAudioTrack(
           AudioTrack.uri(audioUrl, title: 'Audio', language: 'und'),
@@ -245,18 +273,12 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
       if (_currentSpeed != 1.0) {
         await _player.setRate(_currentSpeed);
       }
-      // Start playing after a brief delay to allow buffering
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted && !_player.state.playing) {
-          _player.play();
-        }
-      });
       if (mounted) setState(() => _hasOpenedMedia = true);
       return;
     }
 
     // Unknown type: default behavior
-    await _player.open(Media(streamUrl));
+    await _player.open(Media(streamUrl), play: true);
     await _player.setVolume(_currentVolume * 100);
     if (_currentSpeed != 1.0) {
       await _player.setRate(_currentSpeed);
@@ -776,7 +798,7 @@ class _VideoPlayerScreenState extends State<OnlineVideoPlayerScreen> {
                       return GestureDetector(
                         onTap: () {
                           _player.pause();
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => OnlineVideoPlayerScreen(
